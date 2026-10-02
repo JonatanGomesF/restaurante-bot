@@ -1,53 +1,52 @@
 -- =====================================================================
--- 🍽️ RESTAURANTE BOM SABOR — WHATSAPP DELIVERY & PAINEL DE PEDIDOS
--- SCHEMA SUPABASE (POSTGRESQL)
+-- 🛡️ PROJETO SUPABASE COMPARTILHADO: "rocketsbot"
+-- ISOLAMENTO TOTAL MULTI-TENANT (Barbearia vs Restaurante)
 -- =====================================================================
--- Instruções:
--- 1. Acesse https://supabase.com e entre no seu projeto.
--- 2. Vá em "SQL Editor" na barra lateral esquerda.
--- 3. Clique em "New Query".
--- 4. Cole o código abaixo e clique em "Run" (Executar).
+-- Este script adiciona o tenant 'restaurante_principal' SEM NUNCA
+-- alterar, apagar ou misturar os dados da sua Barbearia ('barbearia_principal').
 -- =====================================================================
 
 -- 1. Habilita extensão para UUIDs se necessário
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. Tabela de Restaurantes / Estabelecimentos
+-- 2. Garante que as tabelas base existam (não altera dados existentes)
 CREATE TABLE IF NOT EXISTS public.barbearias (
     id TEXT PRIMARY KEY,
-    nome TEXT NOT NULL DEFAULT 'Restaurante Bom Sabor',
-    telefone_dono TEXT DEFAULT '5515974062762@c.us',
-    chave_pix TEXT DEFAULT '15974062762',
-    endereco TEXT DEFAULT 'Rua das Delícias, 123 - Centro',
-    taxa_entrega NUMERIC(10, 2) DEFAULT 5.00,
+    nome TEXT NOT NULL DEFAULT 'Estabelecimento',
+    telefone_dono TEXT DEFAULT '',
+    chave_pix TEXT DEFAULT '',
+    endereco TEXT DEFAULT '',
     fechado_hoje BOOLEAN DEFAULT FALSE,
-    motivo_fechado TEXT DEFAULT 'Descanso da equipe',
+    motivo_fechado TEXT DEFAULT '',
     data_fechada_manual TEXT DEFAULT NULL,
-    horario_almoco TEXT DEFAULT '11:00 às 15:00',
-    horario_jantar TEXT DEFAULT '18:00 às 23:30',
     ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Tabela de Pedidos
+-- Adiciona colunas opcionais para restaurante com segurança
+ALTER TABLE public.barbearias ADD COLUMN IF NOT EXISTS taxa_entrega NUMERIC(10, 2) DEFAULT 5.00;
+ALTER TABLE public.barbearias ADD COLUMN IF NOT EXISTS horario_almoco TEXT DEFAULT '11:00 às 15:00';
+ALTER TABLE public.barbearias ADD COLUMN IF NOT EXISTS horario_jantar TEXT DEFAULT '18:00 às 23:30';
+
+-- 3. Tabela de Pedidos e Agendamentos (Isolada por barbearia_id)
 CREATE TABLE IF NOT EXISTS public.agendamentos (
     id TEXT PRIMARY KEY,
     barbearia_id TEXT NOT NULL REFERENCES public.barbearias(id) ON DELETE CASCADE,
     cliente TEXT NOT NULL,
     telefone TEXT NOT NULL,
-    data TEXT NOT NULL, -- YYYY-MM-DD
-    horario TEXT NOT NULL, -- HH:MM
-    servico TEXT NOT NULL, -- Itens resumidos do pedido
-    preco NUMERIC(10, 2) NOT NULL DEFAULT 0.00, -- Valor Total
-    status TEXT NOT NULL DEFAULT 'pendente', -- 'pendente', 'em_preparo', 'saiu_entrega', 'concluido', 'cancelado'
-    origem TEXT DEFAULT 'whatsapp', -- 'whatsapp' ou 'manual'
+    data TEXT NOT NULL,
+    horario TEXT NOT NULL,
+    servico TEXT NOT NULL,
+    preco NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+    status TEXT NOT NULL DEFAULT 'pendente',
+    origem TEXT DEFAULT 'whatsapp',
     criado_em TIMESTAMPTZ DEFAULT NOW(),
     cancelado_em TIMESTAMPTZ,
     concluido_em TIMESTAMPTZ
 );
 
--- 4. Tabela de Conversas (Estado do WhatsApp Bot)
+-- 4. Tabela de Conversas (Isolada por barbearia_id + telefone)
 CREATE TABLE IF NOT EXISTS public.conversas (
     barbearia_id TEXT NOT NULL REFERENCES public.barbearias(id) ON DELETE CASCADE,
     telefone TEXT NOT NULL,
@@ -56,25 +55,25 @@ CREATE TABLE IF NOT EXISTS public.conversas (
     PRIMARY KEY (barbearia_id, telefone)
 );
 
--- 5. Índices de Busca Rápida
-CREATE INDEX IF NOT EXISTS idx_pedidos_restaurante_data ON public.agendamentos(barbearia_id, data, status);
-CREATE INDEX IF NOT EXISTS idx_pedidos_telefone ON public.agendamentos(barbearia_id, telefone);
+-- 5. Índices de Otimização
+CREATE INDEX IF NOT EXISTS idx_agendamentos_tenant ON public.agendamentos(barbearia_id, data, status);
+CREATE INDEX IF NOT EXISTS idx_conversas_tenant ON public.conversas(barbearia_id, telefone);
 
--- 6. Row Level Security (RLS)
+-- 6. Políticas de RLS
 ALTER TABLE public.barbearias ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agendamentos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.conversas ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Permitir tudo para restaurantes anon" ON public.barbearias;
-CREATE POLICY "Permitir tudo para restaurantes anon" ON public.barbearias FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir tudo para barbearias anon" ON public.barbearias;
+CREATE POLICY "Permitir tudo para barbearias anon" ON public.barbearias FOR ALL USING (true) WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Permitir tudo para pedidos anon" ON public.agendamentos;
-CREATE POLICY "Permitir tudo para pedidos anon" ON public.agendamentos FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir tudo para agendamentos anon" ON public.agendamentos;
+CREATE POLICY "Permitir tudo para agendamentos anon" ON public.agendamentos FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Permitir tudo para conversas anon" ON public.conversas;
 CREATE POLICY "Permitir tudo para conversas anon" ON public.conversas FOR ALL USING (true) WITH CHECK (true);
 
--- 7. Inserção Inicial
+-- 7. Insere o Tenant do Restaurante Bom Sabor (SEM mexer no da Barbearia)
 INSERT INTO public.barbearias (
     id,
     nome,

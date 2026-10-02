@@ -1,0 +1,5 @@
+[2026-10-02T01:53:12.555Z] UNHANDLED_REJECTION: Error: Attempted to use detached Frame '94F0264123EC416BE134403402E2E692'.
+    at CdpFrame.<anonymous> (C:\Users\JONATAN\Documents\bots\botDelivery\node_modules\whatsapp-web.js\node_modules\puppeteer-core\lib\cjs\puppeteer\util\decorators.js:107:23)
+    at CdpPage.evaluate (C:\Users\JONATAN\Documents\bots\botDelivery\node_modules\whatsapp-web.js\node_modules\puppeteer-core\lib\cjs\puppeteer\api\Page.js:830:43)
+    at Client.inject (C:\Users\JONATAN\Documents\bots\botDelivery\node_modules\whatsapp-web.js\src\Client.js:126:38)
+    at C:\Users\JONATAN\Documents\bots\botDelivery\node_modules\whatsapp-web.js\src\Client.js:503:24
