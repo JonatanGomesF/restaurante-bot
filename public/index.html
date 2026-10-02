@@ -484,16 +484,30 @@
                             <small>Use <code>{item}</code>, <code>{preco}</code> e <code>{listaCarnes}</code>.</small>
                         </div>
 
-                        <!-- Mensagem 5: Pergunta de Borda para Pizza -->
+                        <!-- Mensagem 5: Pergunta Pizza Inteira ou Meio a Meio -->
                         <div class="form-group">
-                            <label for="msg-escolhaBorda">5. Pergunta de Borda Recheada para Pizza</label>
+                            <label for="msg-escolhaModoPizza">5. Pergunta Pizza Inteira ou Meio a Meio (1 ou 2 Sabores)</label>
+                            <textarea id="msg-escolhaModoPizza" class="form-input form-textarea" rows="5"></textarea>
+                            <small>Use <code>{item}</code> e <code>{preco}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 6: Escolha do 2º Sabor (Meio a Meio) -->
+                        <div class="form-group">
+                            <label for="msg-escolhaSegundaMetade">6. Escolha do 2º Sabor da Pizza Meio a Meio</label>
+                            <textarea id="msg-escolhaSegundaMetade" class="form-input form-textarea" rows="6"></textarea>
+                            <small>Use <code>{primeiroSabor}</code>, <code>{precoPrimeiro}</code> e <code>{listaSabores}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 7: Pergunta de Borda para Pizza -->
+                        <div class="form-group">
+                            <label for="msg-escolhaBorda">7. Pergunta de Borda Recheada para Pizza</label>
                             <textarea id="msg-escolhaBorda" class="form-input form-textarea" rows="5"></textarea>
                             <small>Use <code>{item}</code>, <code>{preco}</code> e <code>{listaBordas}</code>.</small>
                         </div>
 
-                        <!-- Mensagem 6: Resumo do Carrinho -->
+                        <!-- Mensagem 8: Resumo do Carrinho -->
                         <div class="form-group">
-                            <label for="msg-carrinhoResumo">6. Resumo do Carrinho (Continuar ou Finalizar)</label>
+                            <label for="msg-carrinhoResumo">8. Resumo do Carrinho (Continuar ou Finalizar)</label>
                             <textarea id="msg-carrinhoResumo" class="form-input form-textarea" rows="6"></textarea>
                             <small>Use <code>{resumoCarrinho}</code> e <code>{subtotal}</code>.</small>
                         </div>

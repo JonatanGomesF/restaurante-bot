@@ -205,32 +205,20 @@ async function processarMensagem({ from, nome, texto, sendMessage, sendTyping, e
                 }
             }
 
-            // Se for Pizza, pergunta se quer borda recheada ou observação
+            // Se for Pizza, pergunta se quer Inteira ou Meio a Meio (2 Sabores)
             if (itemEscolhido.categoria === 'pizza') {
-                const bordasRaw = config.opcoesBordas || [];
-                const bordas = bordasRaw.filter(b => b.ativo !== false);
+                db.setEstadoConversa(from, {
+                    ...estado,
+                    status: 'waiting_pizza_mode',
+                    primeiroSabor: itemEscolhido
+                });
 
-                if (bordas.length > 0) {
-                    db.setEstadoConversa(from, {
-                        ...estado,
-                        status: 'waiting_customization_pizza',
-                        itemEmEdicao: itemEscolhido,
-                        bordasDisponiveis: bordas
-                    });
-
-                    let bordasTexto = bordas.map((b, i) => {
-                        const precoExtra = b.preco > 0 ? ` (+ ${formatarMoeda(b.preco)})` : '';
-                        return `${i + 1}️⃣ *${b.nome}*${precoExtra}`;
-                    }).join('\n');
-
-                    return await responder(
-                        formatarTexto(mensagens.escolhaBorda || `🍕 Você escolheu: *{item}* ({preco})\n\n🧀 *Deseja adicionar Borda Recheada ou alguma observação?*\n\n{listaBordas}\n\n_Digite o número ou observação:_`, {
-                            item: itemEscolhido.nome,
-                            preco: formatarMoeda(itemEscolhido.preco),
-                            listaBordas: bordasTexto
-                        })
-                    );
-                }
+                return await responder(
+                    formatarTexto(mensagens.escolhaModoPizza || `🍕 Você escolheu: *{item}* ({preco})\n\nComo deseja montar a sua pizza?\n\n1️⃣ 🍕 *Pizza Inteira (Apenas {item})*\n2️⃣ 🌓 *Pizza Meio a Meio (Escolher 2º sabor)*\n\n_Digite *1* para Inteira ou *2* para Meio a Meio:_`, {
+                        item: itemEscolhido.nome,
+                        preco: formatarMoeda(itemEscolhido.preco)
+                    })
+                );
             }
 
             // Bebidas ou itens sem customização
@@ -246,6 +234,72 @@ async function processarMensagem({ from, nome, texto, sendMessage, sendTyping, e
                 `Quantas unidades você deseja?\n` +
                 `_Digite a quantidade (Ex: 1, 2, 3...):_`
             );
+        }
+
+        // ---- ETAPA 2.1: MODO PIZZA (INTEIRA OU MEIO A MEIO) ----
+        case 'waiting_pizza_mode': {
+            const primeiroSabor = estado.primeiroSabor;
+
+            if (numOpcao === 1 || mensagemLower.includes('inteira') || mensagemLower === '1') {
+                // Pizza Inteira de 1 sabor só
+                return await avancarParaBordasPizza(responder, from, estado, config, primeiroSabor);
+            } else if (numOpcao === 2 || mensagemLower.includes('meio') || mensagemLower.includes('2') || mensagemLower.includes('segundo')) {
+                // Pizza Meio a Meio -> Lista os sabores de pizza para escolher o 2º
+                const todasPizzas = db.getCardapio({ categoria: 'pizza' });
+                db.setEstadoConversa(from, {
+                    ...estado,
+                    status: 'waiting_pizza_second_half',
+                    pizzasDisponiveis: todasPizzas
+                });
+
+                let listaSabores = todasPizzas.map((p, i) => {
+                    const desc = p.descricao ? `\n   _${p.descricao}_` : '';
+                    return `${i + 1}️⃣ 🍕 *${p.nome}* — ${formatarMoeda(p.preco)}${desc}`;
+                }).join('\n\n');
+
+                return await responder(
+                    formatarTexto(mensagens.escolhaSegundaMetade || `🌓 *ESCOLHA O 2º SABOR DA SUA PIZZA:*\n━━━━━━━━━━━━━━━━━━━━\n1º Sabor: *{primeiroSabor}* ({precoPrimeiro})\n━━━━━━━━━━━━━━━━━━━━\n\n{listaSabores}\n\n👉 *Digite o número do 2º sabor desejado:*\n_(O valor total da pizza será o do sabor mais caro)_`, {
+                        primeiroSabor: primeiroSabor.nome,
+                        precoPrimeiro: formatarMoeda(primeiroSabor.preco),
+                        listaSabores: listaSabores
+                    })
+                );
+            } else {
+                return await responder(`⚠️ Por favor, digite *1* para Pizza Inteira ou *2* para Pizza Meio a Meio.`);
+            }
+        }
+
+        // ---- ETAPA 2.2: ESCOLHA DO SEGUNDO SABOR DA PIZZA ----
+        case 'waiting_pizza_second_half': {
+            const todasPizzas = estado.pizzasDisponiveis || db.getCardapio({ categoria: 'pizza' });
+            const index = numOpcao !== null ? numOpcao - 1 : -1;
+
+            if (index < 0 || index >= todasPizzas.length) {
+                return await responder(
+                    `⚠️ Opção inválida! Digite um número de *1 a ${todasPizzas.length}* correspondente ao 2º sabor desejado, ou envie *MENU* para reiniciar.`
+                );
+            }
+
+            const sabor1 = estado.primeiroSabor;
+            const sabor2 = todasPizzas[index];
+
+            // 🍕 REGRA DE OURO: O valor total da pizza é sempre o maior entre os 2 sabores
+            const precoFinalPizza = Math.max(Number(sabor1.preco), Number(sabor2.preco));
+
+            const nomeS1 = sabor1.nome.replace(/^Pizza\s+/i, '');
+            const nomeS2 = sabor2.nome.replace(/^Pizza\s+/i, '');
+            const nomePizzaCombinada = `Pizza 1/2 ${nomeS1} + 1/2 ${nomeS2}`;
+
+            const itemPizzaCombinado = {
+                id: `pizza_${sabor1.id}_${sabor2.id}`,
+                nome: nomePizzaCombinada,
+                preco: precoFinalPizza,
+                categoria: 'pizza',
+                icone: '🍕',
+                descricao: `1/2 ${sabor1.nome} e 1/2 ${sabor2.nome} (Cobrado maior valor: ${formatarMoeda(precoFinalPizza)})`
+            };
+
+            return await avancarParaBordasPizza(responder, from, estado, config, itemPizzaCombinado);
         }
 
         // ---- ETAPA 2.1: CUSTOMIZAÇÃO MARMITEX (CARNE) ----
@@ -521,6 +575,48 @@ async function processarMensagem({ from, nome, texto, sendMessage, sendTyping, e
         default:
             db.limparEstadoConversa(from);
             return await enviarMenuPrincipal(responder, nomeCliente, config);
+    }
+}
+
+// Helper para avançar para a etapa de bordas / quantidade da pizza
+async function avancarParaBordasPizza(responder, from, estado, config, itemEmEdicao) {
+    const mensagens = config.mensagens || {};
+    const bordasRaw = config.opcoesBordas || [];
+    const bordas = bordasRaw.filter(b => b.ativo !== false);
+
+    if (bordas.length > 0) {
+        db.setEstadoConversa(from, {
+            ...estado,
+            status: 'waiting_customization_pizza',
+            itemEmEdicao: itemEmEdicao,
+            bordasDisponiveis: bordas
+        });
+
+        let bordasTexto = bordas.map((b, i) => {
+            const precoExtra = b.preco > 0 ? ` (+ ${formatarMoeda(b.preco)})` : '';
+            return `${i + 1}️⃣ *${b.nome}*${precoExtra}`;
+        }).join('\n');
+
+        return await responder(
+            formatarTexto(mensagens.escolhaBorda || `🍕 Você escolheu: *{item}* ({preco})\n\n🧀 *Deseja adicionar Borda Recheada ou alguma observação?*\n\n{listaBordas}\n\n_Digite o número ou observação:_`, {
+                item: itemEmEdicao.nome,
+                preco: formatarMoeda(itemEmEdicao.preco),
+                listaBordas: bordasTexto
+            })
+        );
+    } else {
+        db.setEstadoConversa(from, {
+            ...estado,
+            status: 'waiting_quantity',
+            itemEmEdicao: itemEmEdicao,
+            customizacao: ''
+        });
+
+        return await responder(
+            `🍕 *${itemEmEdicao.nome}* (${formatarMoeda(itemEmEdicao.preco)})\n\n` +
+            `Quantas pizzas dessa você deseja?\n` +
+            `_Digite a quantidade (Ex: 1, 2):_`
+        );
     }
 }
 

@@ -290,6 +290,8 @@
       "fechadoAviso": "🛑 *AVISO:* O restaurante está fechado hoje ({motivo}).",
       "escolhaCategoria": "🛒 *FAZER PEDIDO — {restaurante}* 🍽️\n\nEscolha a categoria desejada:\n\n{listaCategorias}\n\n_Digite o número da categoria desejada (Ex: 1):_",
       "escolhaItem": "{tituloCategoria}\n━━━━━━━━━━━━━━━━━━━━\n\n{listaItens}\n\n👉 *Digite o número da opção que deseja adicionar:* (Ex: 1)\n_Envie *MENU* para voltar ao início._",
+      "escolhaModoPizza": "🍕 Você escolheu: *{item}* ({preco})\n\nComo deseja montar a sua pizza?\n\n1️⃣ 🍕 *Pizza Inteira (Apenas {item})*\n2️⃣ 🌓 *Pizza Meio a Meio (Escolher 2º sabor)*\n\n_Digite *1* para Inteira ou *2* para Meio a Meio:_",
+      "escolhaSegundaMetade": "🌓 *ESCOLHA O 2º SABOR DA SUA PIZZA:*\n━━━━━━━━━━━━━━━━━━━━\n1º Sabor: *{primeiroSabor}* ({precoPrimeiro})\n━━━━━━━━━━━━━━━━━━━━\n\n{listaSabores}\n\n👉 *Digite o número do 2º sabor desejado:*\n_(O valor da pizza será calculado pelo sabor de maior valor)_",
       "escolhaCarne": "🍱 Você escolheu: *{item}* ({preco})\n\n🥩 *Escolha a opção de carne principal:*\n\n{listaCarnes}\n\n_Digite o número da carne desejada (Ex: 1) ou digite sua preferência / observações:_",
       "escolhaBorda": "🍕 Você escolheu: *{item}* ({preco})\n\n🧀 *Deseja adicionar Borda Recheada ou alguma observação?*\n\n{listaBordas}\n\n_Digite o número ou escreva sua observação (Ex: 'Sem cebola'):_",
       "carrinhoResumo": "🛒 *SEU PEDIDO ATUAL:*\n━━━━━━━━━━━━━━━━━━━━\n{resumoCarrinho}\n━━━━━━━━━━━━━━━━━━━━\n💰 *Subtotal Parcial:* {subtotal}\n\n👉 *O que deseja fazer agora?*\n\n1️⃣ ➕ *Adicionar mais itens ao pedido*\n2️⃣ 🛵 *Concluir pedido e informar endereço de entrega*\n\n_Digite *1* para continuar comprando ou *2* para finalizar._",
@@ -451,6 +453,43 @@
   },
   "pedidos": [
     {
+      "id": "ped_1790907672920_3036",
+      "codigo": "#PED-3036",
+      "cliente": "Carlos",
+      "telefone": "5511999998888",
+      "data": "2026-10-01",
+      "horario": "23:21",
+      "itens": [
+        {
+          "id": "pizza_7_9",
+          "nome": "Pizza 1/2 Calabresa Especial + 1/2 Frango com Catupiry",
+          "qtd": 1,
+          "preco": 48,
+          "total": 48,
+          "observacao": "Tradicional (Sem borda extra)",
+          "opcoesCarne": null,
+          "borda": null
+        }
+      ],
+      "servico": "1x Pizza 1/2 Calabresa Especial + 1/2 Frango com Catupiry",
+      "subtotal": 48,
+      "taxaEntrega": 0,
+      "total": 48,
+      "preco": 48,
+      "tipoEntrega": "retirada",
+      "enderecoEntrega": "Retirada no Balcão",
+      "bairro": "",
+      "formaPagamento": "PIX",
+      "trocoPara": null,
+      "observacoes": "",
+      "status": "pendente",
+      "origem": "whatsapp",
+      "tempoEstimado": "30 a 50 min",
+      "criadoEm": "2026-10-02T02:21:12.894Z",
+      "canceladoEm": null,
+      "concluidoEm": null
+    },
+    {
       "id": "ped_1790906347126_6421",
       "codigo": "#PED-6421",
       "cliente": "Jonatan",
@@ -573,6 +612,43 @@
     }
   ],
   "agendamentos": [
+    {
+      "id": "ped_1790907672920_3036",
+      "codigo": "#PED-3036",
+      "cliente": "Carlos",
+      "telefone": "5511999998888",
+      "data": "2026-10-01",
+      "horario": "23:21",
+      "itens": [
+        {
+          "id": "pizza_7_9",
+          "nome": "Pizza 1/2 Calabresa Especial + 1/2 Frango com Catupiry",
+          "qtd": 1,
+          "preco": 48,
+          "total": 48,
+          "observacao": "Tradicional (Sem borda extra)",
+          "opcoesCarne": null,
+          "borda": null
+        }
+      ],
+      "servico": "1x Pizza 1/2 Calabresa Especial + 1/2 Frango com Catupiry",
+      "subtotal": 48,
+      "taxaEntrega": 0,
+      "total": 48,
+      "preco": 48,
+      "tipoEntrega": "retirada",
+      "enderecoEntrega": "Retirada no Balcão",
+      "bairro": "",
+      "formaPagamento": "PIX",
+      "trocoPara": null,
+      "observacoes": "",
+      "status": "pendente",
+      "origem": "whatsapp",
+      "tempoEstimado": "30 a 50 min",
+      "criadoEm": "2026-10-02T02:21:12.894Z",
+      "canceladoEm": null,
+      "concluidoEm": null
+    },
     {
       "id": "ped_1790906347126_6421",
       "codigo": "#PED-6421",
@@ -697,79 +773,108 @@
   ],
   "conversa": {
     "5511999998888@c.us": {
-      "status": "waiting_item",
+      "status": "waiting_category",
       "carrinho": [],
-      "atualizadoEm": 1790906856807,
-      "categoriaAtual": {
-        "id": "marmitex",
-        "nome": "Marmitex do Dia (Almoço)",
-        "icone": "🍱",
-        "turno": "dia",
-        "ordem": 1,
-        "ativo": true
-      },
+      "atualizadoEm": 1790906099677
+    },
+    "97908191973567@lid": {
+      "status": "waiting_more_or_finish",
+      "carrinho": [
+        {
+          "id": 7,
+          "nome": "Pizza Calabresa Especial",
+          "preco": 42,
+          "qtd": 1,
+          "observacao": "Tradicional (Sem borda extra)",
+          "totalItem": 42
+        }
+      ],
+      "atualizadoEm": 1790907318618,
+      "categoriaAtual": "pizza",
       "itensExibidos": [
         {
-          "id": 1,
-          "categoria": "marmitex",
-          "nome": "Marmitex P (Pequena)",
-          "descricao": "Arroz branco, feijão caseiro, 1 opção de carne e guarnição do dia",
-          "preco": 18,
-          "turno": "dia",
-          "icone": "🍱",
+          "id": 7,
+          "categoria": "pizza",
+          "nome": "Pizza Calabresa Especial",
+          "descricao": "Molho artesanal, mussarela, calabresa fatiada crocante, cebola e azeitonas pretas",
+          "preco": 42,
+          "turno": "noite",
+          "icone": "🍕",
           "ativo": true
         },
         {
-          "id": 2,
-          "categoria": "marmitex",
-          "nome": "Marmitex M (Média - Mais Vendida)",
-          "descricao": "Arroz branco, feijão fresquinho, carne generosa, farofa e guarnições",
-          "preco": 22,
-          "turno": "dia",
-          "icone": "🍱",
+          "id": 8,
+          "categoria": "pizza",
+          "nome": "Pizza Mussarela Tradicional",
+          "descricao": "Molho de tomate especial, camada farta de mussarela derretida, rodelas de tomate e orégano",
+          "preco": 40,
+          "turno": "noite",
+          "icone": "🧀",
           "ativo": true
         },
         {
-          "id": 3,
-          "categoria": "marmitex",
-          "nome": "Marmitex G (Grande)",
-          "descricao": "Porção reforçada: Arroz, feijão, 2 carnes à sua escolha, salada e acompanhamentos",
-          "preco": 26,
-          "turno": "dia",
-          "icone": "🍛",
+          "id": 9,
+          "categoria": "pizza",
+          "nome": "Pizza Frango com Catupiry",
+          "descricao": "Frango desfiado temperado com ervas finas, legítimo Catupiry cremoso e milho",
+          "preco": 48,
+          "turno": "noite",
+          "icone": "🍗",
           "ativo": true
         },
         {
-          "id": 4,
-          "categoria": "marmitex",
-          "nome": "Marmitex Executiva Especial",
-          "descricao": "Bife de Picanha na chapa ou Filé Parmegiana com fritas crocantes e salada",
-          "preco": 32,
-          "turno": "dia",
-          "icone": "🥩",
+          "id": 10,
+          "categoria": "pizza",
+          "nome": "Pizza Portuguesa Completa",
+          "descricao": "Mussarela, presunto selecionado, ovos cozidos, ervilhas, cebola, palmito e azeitonas",
+          "preco": 46,
+          "turno": "noite",
+          "icone": "🍕",
           "ativo": true
         },
         {
-          "id": 5,
-          "categoria": "marmitex",
-          "nome": "Marmitex Fit & Saudável",
-          "descricao": "Arroz integral, peito de frango grelhado suculento e mix de legumes cozidos no vapor",
-          "preco": 24,
-          "turno": "dia",
-          "icone": "🥗",
+          "id": 11,
+          "categoria": "pizza",
+          "nome": "Pizza Quatro Queijos Nobres",
+          "descricao": "Mussarela, provolone defumado, parmesão ralado e requeijão cremoso",
+          "preco": 52,
+          "turno": "noite",
+          "icone": "🧀",
           "ativo": true
         },
         {
-          "id": 6,
-          "categoria": "marmitex",
-          "nome": "Marmitex Feijoada Completa (Especial)",
-          "descricao": "Feijoada tradicional com carnes selecionadas, couve refogada, farofa e torresmo",
-          "preco": 28,
-          "turno": "dia",
-          "icone": "🍲",
+          "id": 12,
+          "categoria": "pizza",
+          "nome": "Pizza Margherita da Casa",
+          "descricao": "Mussarela, fatias de tomate fresco, folhas de manjericão aromático e azeite extravirgem",
+          "preco": 46,
+          "turno": "noite",
+          "icone": "🌿",
+          "ativo": true
+        },
+        {
+          "id": 13,
+          "categoria": "pizza",
+          "nome": "Pizza Doce Brigadeiro com Morangos",
+          "descricao": "Chocolate ao leite cremoso, granulado gourmet e fatias de morangos frescos",
+          "preco": 42,
+          "turno": "noite",
+          "icone": "🍫",
+          "ativo": true
+        },
+        {
+          "id": 14,
+          "categoria": "pizza",
+          "nome": "Pizza Doce Banana com Canela",
+          "descricao": "Fatias de banana caramelizadas, mussarela suave, leite condensado e canela em pó",
+          "preco": 38,
+          "turno": "noite",
+          "icone": "🍌",
           "ativo": true
         }
-      ]
+      ],
+      "itemEmEdicao": null,
+      "customizacao": null
     }
   }
 }

@@ -148,6 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
         msgFechadoAviso: document.getElementById('msg-fechadoAviso'),
         msgEscolhaCategoria: document.getElementById('msg-escolhaCategoria'),
         msgEscolhaCarne: document.getElementById('msg-escolhaCarne'),
+        msgEscolhaModoPizza: document.getElementById('msg-escolhaModoPizza'),
+        msgEscolhaSegundaMetade: document.getElementById('msg-escolhaSegundaMetade'),
         msgEscolhaBorda: document.getElementById('msg-escolhaBorda'),
         msgCarrinhoResumo: document.getElementById('msg-carrinhoResumo'),
         msgTipoEntrega: document.getElementById('msg-tipoEntrega'),
@@ -1020,6 +1022,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elements.msgFechadoAviso) elements.msgFechadoAviso.value = msgs.fechadoAviso || '';
         if (elements.msgEscolhaCategoria) elements.msgEscolhaCategoria.value = msgs.escolhaCategoria || '';
         if (elements.msgEscolhaCarne) elements.msgEscolhaCarne.value = msgs.escolhaCarne || '';
+        if (elements.msgEscolhaModoPizza) elements.msgEscolhaModoPizza.value = msgs.escolhaModoPizza || '';
+        if (elements.msgEscolhaSegundaMetade) elements.msgEscolhaSegundaMetade.value = msgs.escolhaSegundaMetade || '';
         if (elements.msgEscolhaBorda) elements.msgEscolhaBorda.value = msgs.escolhaBorda || '';
         if (elements.msgCarrinhoResumo) elements.msgCarrinhoResumo.value = msgs.carrinhoResumo || '';
         if (elements.msgTipoEntrega) elements.msgTipoEntrega.value = msgs.tipoEntrega || '';
@@ -1038,24 +1042,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function salvarMensagens() {
         const payload = {
-            menuPrincipal: elements.msgMenuPrincipal.value,
-            fechadoAviso: elements.msgFechadoAviso.value,
-            escolhaCategoria: elements.msgEscolhaCategoria.value,
-            escolhaCarne: elements.msgEscolhaCarne.value,
-            escolhaBorda: elements.msgEscolhaBorda.value,
-            carrinhoResumo: elements.msgCarrinhoResumo.value,
-            tipoEntrega: elements.msgTipoEntrega.value,
-            solicitarEndereco: elements.msgSolicitarEndereco.value,
-            formaPagamento: elements.msgFormaPagamento.value,
-            trocoDinheiro: elements.msgTrocoDinheiro.value,
-            pedidoConfirmadoCliente: elements.msgPedidoConfirmadoCliente.value,
-            notificacaoCozinha: elements.msgNotificacaoCozinha.value,
-            pedidoEmPreparo: elements.msgPedidoEmPreparo.value,
-            pedidoSaiuEntrega: elements.msgPedidoSaiuEntrega.value,
-            pedidoProntoRetirada: elements.msgPedidoProntoRetirada.value,
-            pedidoConcluido: elements.msgPedidoConcluido.value,
-            pedidoCancelado: elements.msgPedidoCancelado.value,
-            infoRestaurante: elements.msgInfoRestaurante.value
+            menuPrincipal: elements.msgMenuPrincipal ? elements.msgMenuPrincipal.value : '',
+            fechadoAviso: elements.msgFechadoAviso ? elements.msgFechadoAviso.value : '',
+            escolhaCategoria: elements.msgEscolhaCategoria ? elements.msgEscolhaCategoria.value : '',
+            escolhaCarne: elements.msgEscolhaCarne ? elements.msgEscolhaCarne.value : '',
+            escolhaModoPizza: elements.msgEscolhaModoPizza ? elements.msgEscolhaModoPizza.value : '',
+            escolhaSegundaMetade: elements.msgEscolhaSegundaMetade ? elements.msgEscolhaSegundaMetade.value : '',
+            escolhaBorda: elements.msgEscolhaBorda ? elements.msgEscolhaBorda.value : '',
+            carrinhoResumo: elements.msgCarrinhoResumo ? elements.msgCarrinhoResumo.value : '',
+            tipoEntrega: elements.msgTipoEntrega ? elements.msgTipoEntrega.value : '',
+            solicitarEndereco: elements.msgSolicitarEndereco ? elements.msgSolicitarEndereco.value : '',
+            formaPagamento: elements.msgFormaPagamento ? elements.msgFormaPagamento.value : '',
+            trocoDinheiro: elements.msgTrocoDinheiro ? elements.msgTrocoDinheiro.value : '',
+            pedidoConfirmadoCliente: elements.msgPedidoConfirmadoCliente ? elements.msgPedidoConfirmadoCliente.value : '',
+            notificacaoCozinha: elements.msgNotificacaoCozinha ? elements.msgNotificacaoCozinha.value : '',
+            pedidoEmPreparo: elements.msgPedidoEmPreparo ? elements.msgPedidoEmPreparo.value : '',
+            pedidoSaiuEntrega: elements.msgPedidoSaiuEntrega ? elements.msgPedidoSaiuEntrega.value : '',
+            pedidoProntoRetirada: elements.msgPedidoProntoRetirada ? elements.msgPedidoProntoRetirada.value : '',
+            pedidoConcluido: elements.msgPedidoConcluido ? elements.msgPedidoConcluido.value : '',
+            pedidoCancelado: elements.msgPedidoCancelado ? elements.msgPedidoCancelado.value : '',
+            infoRestaurante: elements.msgInfoRestaurante ? elements.msgInfoRestaurante.value : ''
         };
 
         try {
