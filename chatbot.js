@@ -34,11 +34,11 @@ process.on('unhandledRejection', function (reason) {
     registrarErro('UNHANDLED_REJECTION', reason);
 });
 
-// Relatório semanal automático todo sábado às 20h
+// Relatório semanal automático todo domingo às 22h
 setInterval(async () => {
     const agora = new Date();
-    // 6 = Sábado
-    if (agora.getDay() === 6 && agora.getHours() === 20 && agora.getMinutes() === 0) {
+    // 0 = Domingo
+    if (agora.getDay() === 0 && agora.getHours() === 22 && agora.getMinutes() === 0) {
         const stats = db.getEstatisticas();
         const config = db.getConfig();
 
@@ -46,11 +46,11 @@ setInterval(async () => {
             try {
                 await whatsappManager.sendMessage(
                     config.numeroDono,
-                    `📊 *RELATÓRIO SEMANAL — ${config.nomeSalao.toUpperCase()}*\n\n` +
-                    `✂️ *Total de Agendamentos Ativos:* ${stats.totalConfirmados}\n` +
-                    `✅ *Atendimentos Concluídos:* ${stats.totalConcluidos}\n` +
-                    `💰 *Faturamento Estimado:* R$ ${stats.faturamentoEstimado.toFixed(2)}\n\n` +
-                    `_Tenha um excelente fim de semana!_ 💈`
+                    `📊 *RELATÓRIO SEMANAL — ${config.nomeRestaurante.toUpperCase()}*\n\n` +
+                    `🍱 *Total de Pedidos:* ${stats.totalGeral || stats.totalConfirmados}\n` +
+                    `✅ *Pedidos Entregues:* ${stats.pedidosConcluidos || stats.totalConcluidos}\n` +
+                    `💰 *Faturamento Total:* R$ ${(stats.faturamentoHoje || stats.faturamentoEstimado).toFixed(2)}\n\n` +
+                    `_Excelente trabalho a toda a equipe do Restaurante Bom Sabor!_ 🍽️🍕`
                 );
             } catch (err) {
                 console.error("Erro ao enviar relatório semanal:", err.message);

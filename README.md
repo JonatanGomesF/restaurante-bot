@@ -1,46 +1,37 @@
-# 💈 Barbearia Bot & Painel Web de Agendamentos
+# 🍽️ Restaurante Bom Sabor — WhatsApp Delivery Bot & Painel de Cozinha
 
-Sistema profissional de agendamento automático para salão e barbearia via **WhatsApp**, com **Dashboard Web em Tempo Real**, **Transmissão ao Vivo de QR Code via WebSocket**, e **Prevenção Ativa Anti-Conflito de Horários**.
+Sistema inteligente e automatizado para **Restaurante e Delivery via WhatsApp**.
 
----
-
-## 🚀 Como Executar
-
-1. Inicie o servidor:
-```bash
-npm start
-```
-2. Abra o navegador no painel web:
-👉 **[http://localhost:3000](http://localhost:3000)**
-
-3. No painel, o **QR Code** aparecerá automaticamente na tela. Basta escanear pelo WhatsApp do celular (*Aparelhos Conectados > Conectar um Aparelho*).
+- 🍱 **Almoço / Dia (11h às 15h):** Marmitex variadas com opções de carnes e guarnições do dia.
+- 🍕 **Jantar / Noite (18h às 23h30):** Pizzas artesanais assadas no forno e bebidas geladas.
+- 🛵 **Delivery & Retirada:** Cálculo automático de taxa de entrega, endereço e formas de pagamento (PIX, Cartão na Entrega, Dinheiro com troco).
+- 👨‍🍳 **Painel da Cozinha em Tempo Real:** Acompanhamento de pedidos ao vivo (Pendentes, Em Preparo, Saiu para Entrega, Entregues).
 
 ---
 
-## 🛡️ Lógica Anti-Conflito (Zero Colisão de Horários)
+## 🚀 Como Iniciar
 
-- Quando um cliente agenda um horário (ex: **Segunda-feira às 10:00**), o horário é imediatamente registrado no banco de dados.
-- O sistema **remove automaticamente** esse horário da listagem enviada a qualquer outro cliente.
-- Caso dois clientes tentem confirmar exatamente o mesmo horário simultaneamente, uma **verificação atômica** em tempo real impede a segunda reserva, alertando o usuário e oferecendo apenas as opções vagas restantes.
-- Ao cancelar um agendamento (seja pelo WhatsApp ou pelo Painel Web), a vaga é liberada instantaneamente.
+1. Dê um duplo clique no arquivo `iniciar_restaurante.bat` (ou execute `npm start`).
+2. O Painel de Controle abrirá automaticamente em `http://localhost:3000`.
+3. Na aba **Conexão WhatsApp**, aponte a câmera do WhatsApp para escanear o QR Code.
+4. Pronto! O bot começará a atender os clientes e receber os pedidos automaticamente.
 
 ---
 
-## ✨ Funcionalidades
+## 📱 Fluxo do Cliente no WhatsApp
 
-- **📱 Hub de Conexão WhatsApp com QR Code ao Vivo**:
-  - Exibição de QR Code em tempo real no frontend via Socket.io com animação de scanner.
-  - Indicador de status de conexão (*Aguardando*, *Autenticado*, *Online*).
-  - Informações do perfil conectado, número e opções de desconectar/reiniciar sessão.
-- **📅 Agenda & Calendário Interativo**:
-  - Matriz visual de horários do dia (09:00 às 21:00) destacando vagas livres e agendamentos.
-  - Navegação entre os dias da semana (Segunda a Sábado) com contador de vagas livres.
-  - Criação manual de agendamentos para clientes de balcão.
-- **📋 Gestão Completa de Agendamentos**:
-  - Tabela com filtros por data, status (*Confirmado*, *Concluído*, *Cancelado*) e busca por cliente/telefone.
-- **💬 Simulador WhatsApp & Logs ao Vivo**:
-  - Teste interativo do fluxo do bot diretamente no navegador sem precisar gastar mensagens de teste.
-  - Console em tempo real de mensagens recebidas e enviadas.
-- **⚙️ Configurações & Serviços Customizáveis**:
-  - Edição do nome da barbearia, chave PIX, endereço e WhatsApp do dono (que recebe notificações automáticas).
-  - Tabela de serviços e valores configurável.
+1. **Cardápio Inteligente:** O cliente digita `1` ou `pedir` e o bot lista as opções de Marmitex ou Pizzas conforme o turno do dia.
+2. **Personalização:** Escolha da carne (Bife, Frango, Bisteca, Parmegiana) ou Borda Recheada.
+3. **Carrinho de Compras:** Adiciona itens, quantidades e complementos.
+4. **Entrega ou Retirada:** Solicita o endereço completo ou confirma retirada no balcão.
+5. **Pagamento:** PIX com envio da chave, Cartão na entrega ou Dinheiro com cálculo de troco.
+6. **Acompanhamento de Status:** O cliente pode enviar `STATUS` a qualquer momento para ver se o pedido está sendo preparado ou já saiu com o motoboy.
+
+---
+
+## ⚙️ Tecnologias
+
+- **Node.js & Express**
+- **whatsapp-web.js & Puppeteer**
+- **Socket.io** (atualizações em tempo real)
+- **Vanilla CSS & JS** com tema Gourmet Dark moderno

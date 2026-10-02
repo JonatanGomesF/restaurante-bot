@@ -23,7 +23,7 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3000;
 
-// Resolução segura da pasta public (na pasta do executável ou no projeto)
+// Resolução da pasta public
 const publicDir = fs.existsSync(path.join(APP_DIR, 'public'))
     ? path.join(APP_DIR, 'public')
     : path.join(__dirname, '..', 'public');
@@ -95,28 +95,28 @@ app.get('/api/bot/qr', (req, res) => {
     });
 });
 
-// 2. Listagem de Agendamentos com filtros
-app.get('/api/appointments', (req, res) => {
+// 2. Listagem de Pedidos com filtros (e compatibilidade /api/appointments)
+app.get(['/api/orders', '/api/appointments'], (req, res) => {
     const { data, status, busca } = req.query;
-    const agendamentos = db.getTodosAgendamentos({ data, status, busca });
-    res.json(agendamentos);
+    const pedidos = db.getTodosPedidos({ data, status, busca });
+    res.json(pedidos);
 });
 
-// 3. Criar Agendamento Manual (pelo Dashboard)
-app.post('/api/appointments', (req, res) => {
-    const { cliente, telefone, data, horario, servico, preco } = req.body;
+// 3. Criar Pedido Manual (pelo Painel do Restaurante)
+app.post(['/api/orders', '/api/appointments'], (req, res) => {
+    const { cliente, telefone, itens, servico, preco, tipoEntrega, enderecoEntrega, formaPagamento } = req.body;
 
-    if (!data || !horario) {
-        return res.status(400).json({ success: false, error: 'Data e horário são obrigatórios!' });
-    }
+    const itensFinal = Array.isArray(itens) && itens.length > 0 
+        ? itens 
+        : [{ nome: servico || 'Pedido Balcão', qtd: 1, preco: Number(preco) || 22.00 }];
 
-    const resultado = db.criarAgendamento({
+    const resultado = db.criarPedido({
         cliente: cliente || 'Cliente Balcão',
         telefone: telefone ? (telefone.includes('@') ? telefone : `${telefone.replace(/\D/g, '')}@c.us`) : 'balcao@c.us',
-        data,
-        horario,
-        servico: servico || 'Corte Tradicional',
-        preco: Number(preco) || 35,
+        itens: itensFinal,
+        tipoEntrega: tipoEntrega || 'retirada',
+        enderecoEntrega: enderecoEntrega || '',
+        formaPagamento: formaPagamento || 'Dinheiro / Balcão',
         origem: 'manual'
     });
 
@@ -124,86 +124,101 @@ app.post('/api/appointments', (req, res) => {
         return res.status(409).json(resultado);
     }
 
-    // Emite evento para todos os clientes conectados
-    io.emit('novo_agendamento', resultado.agendamento);
+    io.emit('novo_agendamento', resultado.pedido);
+    io.emit('novo_pedido', resultado.pedido);
+    io.emit('stats_update', db.getEstatisticas());
 
     res.status(201).json(resultado);
 });
 
-// 4. Cancelar Agendamento
-app.delete('/api/appointments/:id', (req, res) => {
+// 4. Alterar Status do Pedido (Pendente -> Em Preparo -> Saiu para Entrega -> Concluído -> Cancelado)
+app.put('/api/orders/:id/status', async (req, res) => {
     const { id } = req.params;
-    const resultado = db.cancelarAgendamento(id);
+    const { status, avisarCliente = true } = req.body;
+
+    const resultado = db.atualizarStatusPedido(id, status);
 
     if (!resultado.success) {
         return res.status(404).json(resultado);
     }
 
-    io.emit('agendamento_cancelado', resultado.agendamento);
+    io.emit('pedido_atualizado', resultado.pedido);
+    io.emit('agendamento_atualizado', resultado.pedido);
+    io.emit('stats_update', db.getEstatisticas());
+
+    // Se solicitado e o WhatsApp estiver conectado, notifica o cliente
+    if (avisarCliente && resultado.pedido.telefone && whatsappManager.status === 'READY') {
+        const ped = resultado.pedido;
+        let msgStatus = '';
+        if (status === 'em_preparo') {
+            msgStatus = `👨‍🍳 *Seu pedido [${ped.codigo}] já está no fogo/forno sendo preparado no capricho!*`;
+        } else if (status === 'saiu_entrega') {
+            msgStatus = ped.tipoEntrega === 'delivery'
+                ? `🛵 *Oba! Seu pedido [${ped.codigo}] acabou de sair para entrega e está a caminho!*`
+                : `🛍️ *Seu pedido [${ped.codigo}] está prontinho para retirada no balcão!*`;
+        } else if (status === 'concluido') {
+            msgStatus = `✅ *Pedido [${ped.codigo}] entregue com sucesso! Bom apetite e volte sempre!* 😋❤️`;
+        }
+
+        if (msgStatus) {
+            try {
+                await whatsappManager.sendMessage(ped.telefone, msgStatus);
+            } catch (e) {}
+        }
+    }
+
     res.json(resultado);
 });
 
-// 5. Concluir Agendamento
-app.put('/api/appointments/:id/concluir', (req, res) => {
+// 4.1 Cancelar Pedido
+app.delete(['/api/orders/:id', '/api/appointments/:id'], (req, res) => {
     const { id } = req.params;
-    const resultado = db.concluirAgendamento(id);
+    const resultado = db.cancelarPedido(id);
 
     if (!resultado.success) {
         return res.status(404).json(resultado);
     }
 
-    io.emit('agendamento_atualizado', resultado.agendamento);
+    io.emit('agendamento_cancelado', resultado.pedido);
+    io.emit('stats_update', db.getEstatisticas());
     res.json(resultado);
 });
 
-// 6. Consultar Horários Livres e Ocupados para um dia específico
-app.get('/api/slots', (req, res) => {
-    const { date } = req.query;
-    if (!date) {
-        return res.status(400).json({ error: 'Parâmetro date é obrigatório (YYYY-MM-DD)' });
+// 4.2 Concluir Pedido
+app.put(['/api/orders/:id/concluir', '/api/appointments/:id/concluir'], (req, res) => {
+    const { id } = req.params;
+    const resultado = db.atualizarStatusPedido(id, 'concluido');
+
+    if (!resultado.success) {
+        return res.status(404).json(resultado);
     }
 
-    const config = db.getConfig();
-    const todosHorarios = config.horariosBase || [];
-    const agendamentosDoDia = db.getTodosAgendamentos({ data: date, status: 'confirmado' });
-    const horariosLivres = db.getHorariosDisponiveis(date);
-    const hojeStr = db.formatarDataLocal(new Date());
-    const isHojeFechado = (date === hojeStr) && db.isFechadoHoje();
-
-    const slots = todosHorarios.map(h => {
-        const ag = agendamentosDoDia.find(a => a.horario === h);
-        return {
-            horario: h,
-            ocupado: !!ag,
-            disponivel: !isHojeFechado && horariosLivres.includes(h),
-            agendamento: ag || null
-        };
-    });
-
-    res.json({
-        data: date,
-        fechadoHoje: isHojeFechado,
-        motivoFechado: isHojeFechado ? (config.motivoFechado || 'Salão Fechado Hoje') : null,
-        totalSlots: todosHorarios.length,
-        livres: isHojeFechado ? 0 : horariosLivres.length,
-        ocupados: agendamentosDoDia.length,
-        slots
-    });
+    io.emit('agendamento_atualizado', resultado.pedido);
+    io.emit('stats_update', db.getEstatisticas());
+    res.json(resultado);
 });
 
-// 7. Próximos dias disponíveis
-app.get('/api/days', (req, res) => {
-    const dias = db.getProximosDiasDisponiveis();
-    res.json(dias);
+// 5. Cardápio do Restaurante
+app.get('/api/menu', (req, res) => {
+    const cardapio = db.getCardapio({ apenasAtivos: false });
+    res.json(cardapio);
 });
 
-// 8. Métricas e Estatísticas
+app.post('/api/menu', (req, res) => {
+    const novoCardapio = req.body;
+    const configAtual = db.getConfig();
+    const salva = db.salvarConfig({ ...configAtual, cardapio: novoCardapio });
+    io.emit('config_atualizada', salva);
+    res.json({ success: true, cardapio: salva.cardapio });
+});
+
+// 6. Métricas e Estatísticas
 app.get('/api/stats', (req, res) => {
     const stats = db.getEstatisticas();
     res.json(stats);
 });
 
-// 9. Configurações da Barbearia
+// 7. Configurações do Restaurante
 app.get('/api/config', (req, res) => {
     const config = db.getConfig();
     res.json(config);
@@ -217,7 +232,7 @@ app.post('/api/config', (req, res) => {
     res.json({ success: true, config: salva });
 });
 
-// 9.1 Alternar Modo "HOJE ESTAMOS FECHADOS"
+// 7.1 Alternar Modo "HOJE ESTAMOS FECHADOS"
 app.post('/api/config/fechado-hoje', (req, res) => {
     const { fechado, motivo } = req.body;
     const configAtual = db.getConfig();
@@ -241,7 +256,7 @@ app.post('/api/config/fechado-hoje', (req, res) => {
     });
 });
 
-// 10. Ações do Bot WhatsApp
+// 8. Ações do Bot WhatsApp
 app.post('/api/bot/restart', async (req, res) => {
     try {
         await whatsappManager.restart();
@@ -256,7 +271,7 @@ app.post('/api/bot/logout', async (req, res) => {
     res.json(resultado);
 });
 
-// 11. Simulador de Conversa em Tempo Real (Testes Direto no Navegador)
+// 9. Simulador de Pedidos via WhatsApp (Testes Direto no Navegador)
 app.post('/api/simulator/chat', async (req, res) => {
     const { telefone = '5511999998888@c.us', nome = 'Cliente Teste', mensagem } = req.body;
 
@@ -284,7 +299,7 @@ app.post('/api/simulator/chat', async (req, res) => {
     });
 });
 
-// 12. Auto-Update de Layout via GitHub
+// 10. Auto-Update de Layout via GitHub
 app.get('/api/system/version', (req, res) => {
     res.json(updater.obterVersaoLocal());
 });
@@ -307,31 +322,24 @@ app.use((req, res, next) => {
 // Conexão WebSocket (Socket.io)
 // -----------------------------
 io.on('connection', (socket) => {
-    console.log(`🔌 Novo cliente conectado ao Dashboard (Socket ID: ${socket.id})`);
+    console.log(`🔌 Novo cliente conectado ao Painel (Socket ID: ${socket.id})`);
 
-    // Envia o status atualizado imediatamente ao conectar
     socket.emit('status_change', whatsappManager.getStatus());
     socket.emit('stats_update', db.getEstatisticas());
-
-    socket.on('disconnect', () => {
-        // Desconexão do cliente do painel
-    });
 });
 
 // -----------------------------
 // Inicialização do Servidor
 // -----------------------------
 function startServer() {
-    // Inicializa conexão e sincronização com o banco Supabase
     db.inicializarDatabase();
 
-    // Verifica de forma não-bloqueante atualizações de layout no GitHub
     updater.verificarEAtualizarLayout(false).catch(() => {});
 
     server.on('error', (err) => {
         if (err.code === 'EADDRINUSE') {
             console.error(`\n❌ ERRO: A porta ${PORT} já está sendo usada por outro processo!`);
-            console.error(`Feche qualquer outra janela do BarbeariaBot aberta ou encerre processos anteriores.\n`);
+            console.error(`Feche qualquer outra janela do RestauranteBot aberta ou encerre processos anteriores.\n`);
         } else {
             console.error(`❌ Erro no servidor web:`, err.message);
         }
@@ -339,11 +347,10 @@ function startServer() {
 
     server.listen(PORT, () => {
         console.log(`\n======================================================`);
-        console.log(`🚀 [PAINEL DO SALÃO ONLINE] Acesse http://localhost:${PORT}`);
-        console.log(`💈 Barbearia Bot & Dashboard de Agendamentos Ativo`);
+        console.log(`🚀 [PAINEL DO RESTAURANTE ONLINE] Acesse http://localhost:${PORT}`);
+        console.log(`🍽️ Restaurante Bom Sabor — Marmitex (Dia) & Pizzaria (Noite)`);
         console.log(`======================================================\n`);
         
-        // Inicializa o cliente WhatsApp automaticamente
         whatsappManager.initialize();
     });
 }

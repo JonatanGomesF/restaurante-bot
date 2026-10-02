@@ -1,11 +1,9 @@
-// Barbearia Bot & Dashboard Frontend Engine
+// Restaurante Bom Sabor & WhatsApp Delivery Hub Engine
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializa Lucide Icons
     if (window.lucide) {
         lucide.createIcons();
     }
 
-    // Helper de Data Local (YYYY-MM-DD)
     function getTodayDateString() {
         const d = new Date();
         const ano = d.getFullYear();
@@ -14,22 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${ano}-${mes}-${dia}`;
     }
 
+    function formatarMoeda(val) {
+        return `R$ ${(Number(val) || 0).toFixed(2).replace('.', ',')}`;
+    }
+
     // Estado da Aplicação
     const state = {
         currentTab: 'tab-qrcode',
         selectedDate: getTodayDateString(),
-        daysList: [],
-        services: [],
-        horariosBase: [],
+        menu: [],
+        activeMenuFilter: 'marmitex',
         config: {},
         stats: {},
         botStatus: 'DISCONNECTED',
-        appointments: []
+        orders: []
     };
 
     // Elementos DOM
     const elements = {
-        // Navigation & Titles
         navBtns: document.querySelectorAll('.nav-btn'),
         tabContents: document.querySelectorAll('.tab-content'),
         pageTitle: document.getElementById('page-title'),
@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         qrContainerConnected: document.getElementById('qr-container-connected'),
         qrImage: document.getElementById('qr-image'),
         qrLoader: document.getElementById('qr-loader'),
-        qrScannerLine: document.getElementById('qr-scanner-line'),
         qrProgress: document.getElementById('qr-progress'),
 
         // Connected Info
@@ -65,18 +64,17 @@ document.addEventListener('DOMContentLoaded', () => {
         statFaturamento: document.getElementById('stat-faturamento'),
         todayCountBadge: document.getElementById('today-count-badge'),
 
-        // Calendar & Slots
+        // Live Orders Cozinha
         calendarSelectedDateLabel: document.getElementById('calendar-selected-date-label'),
         calendarSelectedDateSub: document.getElementById('calendar-selected-date-sub'),
         btnPrevDay: document.getElementById('btn-prev-day'),
         btnNextDay: document.getElementById('btn-next-day'),
-        quickDaysContainer: document.getElementById('quick-days-container'),
         slotsGridContainer: document.getElementById('slots-grid-container'),
         calendarClosedAlert: document.getElementById('calendar-closed-alert'),
         calendarClosedReason: document.getElementById('calendar-closed-reason'),
         btnQuickReopen: document.getElementById('btn-quick-reopen'),
 
-        // Appointments Table
+        // Orders Table
         searchAppointments: document.getElementById('search-appointments'),
         filterStatus: document.getElementById('filter-status'),
         filterDate: document.getElementById('filter-date'),
@@ -95,9 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
         cfgNome: document.getElementById('cfg-nome'),
         cfgDono: document.getElementById('cfg-dono'),
         cfgEndereco: document.getElementById('cfg-endereco'),
+        cfgTaxa: document.getElementById('cfg-taxa'),
         cfgPix: document.getElementById('cfg-pix'),
+        cfgAlmoco: document.getElementById('cfg-almoco'),
+        cfgJantar: document.getElementById('cfg-jantar'),
 
-        // Modo Hoje Estamos Fechados
+        // Modo Hoje Fechado
         cardStatusFuncionamento: document.getElementById('card-status-funcionamento'),
         badgeStatusFechado: document.getElementById('badge-status-fechado'),
         txtBadgeStatusFechado: document.getElementById('txt-badge-status-fechado'),
@@ -105,22 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
         btnToggleFechadoHoje: document.getElementById('btn-toggle-fechado-hoje'),
         txtBtnToggleFechado: document.getElementById('txt-btn-toggle-fechado'),
 
-        // Vagas & Horários Base Editor
-        vagasCountBadge: document.getElementById('vagas-count-badge'),
-        slotsCountNumber: document.getElementById('slots-count-number'),
-        preset12Vagas: document.getElementById('preset-12-vagas'),
-        preset8Vagas: document.getElementById('preset-8-vagas'),
-        preset15Vagas: document.getElementById('preset-15-vagas'),
-        preset30Min: document.getElementById('preset-30min'),
-        inputNewTime: document.getElementById('input-new-time'),
-        btnAddSlotTime: document.getElementById('btn-add-slot-time'),
-        slotsChipsContainer: document.getElementById('slots-chips-container'),
-        workingDaysContainer: document.getElementById('working-days-container'),
-        btnSaveSlots: document.getElementById('btn-save-slots'),
-
-        // Services
+        // Cardápio
         servicesListContainer: document.getElementById('services-list-container'),
         btnAddService: document.getElementById('btn-add-service'),
+        btnFilterMarmitex: document.getElementById('btn-filter-marmitex'),
+        btnFilterPizza: document.getElementById('btn-filter-pizza'),
+        btnFilterBebidas: document.getElementById('btn-filter-bebidas'),
+        btnFilterTodos: document.getElementById('btn-filter-todos'),
 
         // Modal
         btnModalNovoAgendamento: document.getElementById('btn-modal-novo-agendamento'),
@@ -130,17 +122,18 @@ document.addEventListener('DOMContentLoaded', () => {
         formNovoAgendamento: document.getElementById('form-novo-agendamento'),
         modalCliente: document.getElementById('modal-cliente'),
         modalTelefone: document.getElementById('modal-telefone'),
-        modalData: document.getElementById('modal-data'),
-        modalHorario: document.getElementById('modal-horario'),
+        modalTipoEntrega: document.getElementById('modal-tipo-entrega'),
+        modalPagamento: document.getElementById('modal-pagamento'),
+        modalGroupEndereco: document.getElementById('modal-group-endereco'),
+        modalEndereco: document.getElementById('modal-endereco'),
         modalServico: document.getElementById('modal-servico'),
 
-        // Global Refresh & Toast
         btnRefreshAll: document.getElementById('btn-refresh-all'),
         toastContainer: document.getElementById('toast-container')
     };
 
     // ------------------------------------------------------------------
-    // Socket.io Connection & Event Handling (com fallback robusto)
+    // Socket.io
     // ------------------------------------------------------------------
     let socket = null;
     try {
@@ -153,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             socket.on('connect', () => {
-                addLog('system', 'Conectado ao servidor Socket.io');
+                addLog('system', 'Conectado à central do Restaurante');
                 fetchStatus();
             });
 
@@ -171,20 +164,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 refreshData();
             });
 
-            socket.on('novo_agendamento', (ag) => {
-                showToast(`🎉 Novo agendamento: ${ag.cliente} (${ag.horario})`, 'success');
-                addLog('saida', `Novo agendamento confirmado para ${ag.cliente} às ${ag.horario}`);
+            socket.on('novo_agendamento', (ped) => {
+                showToast(`🚨 Novo Pedido [${ped.codigo || '#PED'}]: ${ped.cliente}`, 'success');
+                addLog('saida', `Novo pedido recebido: ${ped.cliente} (${ped.servico})`);
                 refreshData();
                 playNotificationSound();
             });
 
-            socket.on('agendamento_cancelado', (ag) => {
-                showToast(`⚠️ Agendamento cancelado: ${ag.cliente} (${ag.horario})`, 'info');
-                addLog('system', `Agendamento cancelado: ${ag.cliente} às ${ag.horario}`);
+            socket.on('pedido_atualizado', () => {
                 refreshData();
             });
 
             socket.on('agendamento_atualizado', () => {
+                refreshData();
+            });
+
+            socket.on('agendamento_cancelado', (ped) => {
+                showToast(`⚠️ Pedido cancelado: ${ped.codigo || ''} ${ped.cliente}`, 'info');
+                addLog('system', `Pedido cancelado: ${ped.codigo || ''} ${ped.cliente}`);
                 refreshData();
             });
 
@@ -201,21 +198,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyConfigToUI(cfg, false);
             });
         }
-    } catch (e) {
-        console.warn("Socket.io não disponível, operando em modo polling REST:", e);
-    }
+    } catch (e) {}
 
-    // ------------------------------------------------------------------
-    // UI Helpers & Clock
-    // ------------------------------------------------------------------
+    // Clock
     function updateClock() {
         const now = new Date();
-        elements.liveClock.textContent = now.toLocaleTimeString('pt-BR');
+        if (elements.liveClock) elements.liveClock.textContent = now.toLocaleTimeString('pt-BR');
     }
     setInterval(updateClock, 1000);
     updateClock();
 
     function showToast(message, type = 'info') {
+        if (!elements.toastContainer) return;
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         
@@ -243,8 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const gain = ctx.createGain();
             osc.connect(gain);
             gain.connect(ctx.destination);
-            osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-            osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
+            osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+            osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
             gain.gain.setValueAtTime(0.3, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
             osc.start();
@@ -252,1055 +246,685 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {}
     }
 
-    function addLog(tipo, text) {
+    function addLog(tipo, texto) {
+        if (!elements.logsConsole) return;
         const entry = document.createElement('div');
         entry.className = `log-entry ${tipo}`;
-        const time = new Date().toLocaleTimeString('pt-BR');
-        entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-text">${escapeHtml(text)}</span>`;
+        const hora = new Date().toLocaleTimeString('pt-BR');
+        entry.innerHTML = `<span class="log-time">[${hora}]</span> <span class="log-text">${escapeHtml(texto)}</span>`;
         elements.logsConsole.appendChild(entry);
         elements.logsConsole.scrollTop = elements.logsConsole.scrollHeight;
     }
 
     function escapeHtml(str) {
-        return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 
-    // ------------------------------------------------------------------
-    // QR Code & Status UI Updates (Tripla camada de renderização)
-    // ------------------------------------------------------------------
-    function updateQrUI(data) {
-        if (!data) return;
-
-        // Fonte da imagem do QR: dataURL ou endpoint direto /api/qr.png
-        const qrSrc = data.qrImage || (data.qr ? `/api/qr.png?t=${Date.now()}` : `/api/qr.png?t=${Date.now()}`);
-
-        if (data.qrImage || data.qr || data.status === 'QR_READY') {
-            elements.qrImage.onload = () => {
-                elements.qrImage.classList.remove('hidden');
-                elements.qrLoader.classList.add('hidden');
-                elements.qrScannerLine.classList.remove('hidden');
-            };
-
-            elements.qrImage.onerror = () => {
-                // Se falhar o dataURL, tenta via endpoint direto da API
-                if (!elements.qrImage.src.includes('/api/qr.png')) {
-                    elements.qrImage.src = `/api/qr.png?t=${Date.now()}`;
-                }
-            };
-
-            elements.qrImage.src = qrSrc;
-            elements.qrImage.classList.remove('hidden');
-            elements.qrLoader.classList.add('hidden');
-            elements.qrScannerLine.classList.remove('hidden');
-
-            elements.qrProgress.style.width = '100%';
-            setTimeout(() => {
-                elements.qrProgress.style.transition = 'width 20s linear';
-                elements.qrProgress.style.width = '0%';
-            }, 100);
-        }
-
-        elements.qrContainerWaiting.classList.remove('hidden');
-        elements.qrContainerConnected.classList.add('hidden');
-
-        elements.qrStatusPill.className = 'connection-status-pill';
-        elements.qrStatusPill.innerHTML = `<span class="pill-dot"></span><span class="pill-text">QR Pronto para Leitura</span>`;
-    }
-
-    function updateBotStatusUI(data) {
-        if (!data) return;
-        state.botStatus = data.status || 'DISCONNECTED';
-
-        if (state.botStatus === 'READY' || state.botStatus === 'AUTHENTICATED') {
-            elements.statusPulse.className = 'status-pulse-dot online';
-            elements.sidebarStatusText.textContent = 'Bot Online';
-            elements.sidebarStatusSubtext.textContent = 'Respondendo via WhatsApp';
-
-            elements.qrNavBadge.textContent = 'ONLINE';
-            elements.qrNavBadge.className = 'nav-badge';
-            elements.qrNavBadge.style.background = 'var(--accent-emerald)';
-            elements.qrNavBadge.style.color = '#000';
-
-            elements.qrContainerWaiting.classList.add('hidden');
-            elements.qrContainerConnected.classList.remove('hidden');
-            elements.qrLoader.classList.add('hidden');
-
-            const info = data.userInfo || {};
-            elements.userPushname.textContent = info.pushname || 'Barbearia';
-            elements.userPhone.textContent = info.phone ? `+${info.phone}` : (info.wid ? `+${info.wid}` : 'Conectado');
-            elements.userPlatform.textContent = info.platform || 'WhatsApp Web';
-
-            elements.qrStatusPill.className = 'connection-status-pill online';
-            elements.qrStatusPill.innerHTML = `<span class="pill-dot"></span><span class="pill-text">🟢 Conectado & Online</span>`;
-
-        } else if (state.botStatus === 'QR_READY') {
-            elements.statusPulse.className = 'status-pulse-dot';
-            elements.sidebarStatusText.textContent = 'Aguardando QR';
-            elements.sidebarStatusSubtext.textContent = 'Escaneie pelo celular';
-            elements.qrNavBadge.textContent = 'QR';
-            elements.qrNavBadge.style.background = 'var(--primary)';
-            elements.qrNavBadge.style.color = '#000';
-
-            updateQrUI(data);
-
-        } else if (state.botStatus === 'INITIALIZING') {
-            elements.statusPulse.className = 'status-pulse-dot';
-            elements.sidebarStatusText.textContent = 'Iniciando...';
-            elements.sidebarStatusSubtext.textContent = 'Abrindo navegador';
-            elements.qrNavBadge.textContent = 'INIC';
-            elements.qrNavBadge.style.background = 'var(--primary)';
-            elements.qrNavBadge.style.color = '#000';
-
-            elements.qrContainerWaiting.classList.remove('hidden');
-            elements.qrContainerConnected.classList.add('hidden');
-            elements.qrLoader.classList.remove('hidden');
-            elements.qrImage.classList.add('hidden');
-            elements.qrScannerLine.classList.add('hidden');
-
-            elements.qrStatusPill.className = 'connection-status-pill';
-            elements.qrStatusPill.innerHTML = `<span class="pill-dot"></span><span class="pill-text">Iniciando WhatsApp...</span>`;
-
-        } else {
-            elements.statusPulse.className = 'status-pulse-dot offline';
-            elements.sidebarStatusText.textContent = 'Desconectado';
-            elements.sidebarStatusSubtext.textContent = 'Clique para reiniciar';
-            elements.qrNavBadge.textContent = 'OFF';
-            elements.qrNavBadge.style.background = 'rgba(239, 68, 68, 0.2)';
-            elements.qrNavBadge.style.color = '#EF4444';
-
-            elements.qrContainerWaiting.classList.remove('hidden');
-            elements.qrContainerConnected.classList.add('hidden');
-            elements.qrStatusPill.className = 'connection-status-pill';
-            elements.qrStatusPill.innerHTML = `<span class="pill-dot"></span><span class="pill-text">Desconectado</span>`;
-        }
-    }
-
-    function updateStatsUI(stats) {
-        if (!stats) return;
-        state.stats = stats;
-        elements.statHoje.textContent = stats.agendamentosHoje || 0;
-        elements.statLivres.textContent = stats.horariosLivresHoje || 0;
-        elements.statTotal.textContent = stats.totalConfirmados || 0;
-        elements.statFaturamento.textContent = `R$ ${(stats.faturamentoEstimado || 0).toFixed(2)}`;
-        elements.todayCountBadge.textContent = stats.agendamentosHoje || 0;
-    }
-
-    // ------------------------------------------------------------------
-    // Configurações & Modo Fechado Hoje
-    // ------------------------------------------------------------------
-    function updateClosedStatusUI(isClosed, motivo = '') {
-        const closed = Boolean(isClosed);
-        if (closed) {
-            elements.badgeStatusFechado.className = 'closed-status-pill closed';
-            elements.txtBadgeStatusFechado.textContent = '🛑 Salão FECHADO Hoje';
-            elements.cardStatusFuncionamento.classList.add('is-closed');
-            elements.txtBtnToggleFechado.textContent = '🟢 Reabrir Salão Hoje';
-            elements.btnToggleFechadoHoje.className = 'btn btn-success-solid';
-
-            // Alerta no Calendário se a data selecionada for hoje
-            if (state.selectedDate === getTodayDateString()) {
-                elements.calendarClosedAlert.classList.remove('hidden');
-                if (elements.calendarClosedReason) {
-                    elements.calendarClosedReason.textContent = `Atendimento suspenso (${motivo || 'Pausado pelo administrador'}). O bot no WhatsApp está bloqueando agendamentos para hoje e direcionando para os próximos dias.`;
-                }
-            } else {
-                elements.calendarClosedAlert.classList.add('hidden');
-            }
-        } else {
-            elements.badgeStatusFechado.className = 'closed-status-pill open';
-            elements.txtBadgeStatusFechado.textContent = '🟢 Salão Aberto Hoje';
-            elements.cardStatusFuncionamento.classList.remove('is-closed');
-            elements.txtBtnToggleFechado.textContent = '🛑 Ativar Modo: HOJE ESTAMOS FECHADOS';
-            elements.btnToggleFechadoHoje.className = 'btn btn-danger-solid';
-            elements.calendarClosedAlert.classList.add('hidden');
-        }
-    }
-
-    function renderWorkingDays(diasSemana) {
-        const checkboxes = elements.workingDaysContainer.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(cb => {
-            const dayNum = cb.getAttribute('data-day');
-            cb.checked = Boolean(diasSemana && diasSemana[dayNum]);
-        });
-    }
-
-    function renderSlotsChips(horarios) {
-        elements.slotsChipsContainer.innerHTML = '';
-        const sorted = [...horarios].sort();
-        state.horariosBase = sorted;
-
-        const count = sorted.length;
-        elements.vagasCountBadge.textContent = `${count} Vagas Diárias`;
-        elements.slotsCountNumber.textContent = count;
-
-        if (sorted.length === 0) {
-            elements.slotsChipsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85rem;">Nenhum horário cadastrado. Adicione horários acima.</span>`;
-            return;
-        }
-
-        sorted.forEach(hora => {
-            const chip = document.createElement('div');
-            chip.className = 'slot-time-chip';
-            chip.innerHTML = `
-                <span>⏰ ${hora}</span>
-                <button type="button" class="btn-remove-chip" title="Remover horário" onclick="removerHorarioSlot('${hora}')">✕</button>
-            `;
-            elements.slotsChipsContainer.appendChild(chip);
-        });
-    }
-
-    window.removerHorarioSlot = function(hora) {
-        state.horariosBase = state.horariosBase.filter(h => h !== hora);
-        renderSlotsChips(state.horariosBase);
-    };
-
-    function applyConfigToUI(config, force = false) {
-        if (!config) return;
-        state.config = config;
-        if (elements.sidebarSalonName) elements.sidebarSalonName.textContent = config.nomeSalao || 'Barbearia';
-        if (elements.simBarberTitle) elements.simBarberTitle.textContent = config.nomeSalao || 'Barbearia';
-
-        // Previne sobrescrever o que o usuário está digitando caso não seja ação forçada (ex: salvar)
-        const isFocused = (el) => el && (document.activeElement === el);
-        const isFormFocused = elements.formConfigGeral && elements.formConfigGeral.contains(document.activeElement);
-
-        if (force || !isFormFocused) {
-            if (elements.cfgNome && (force || !isFocused(elements.cfgNome))) {
-                elements.cfgNome.value = config.nomeSalao || '';
-            }
-            if (elements.cfgDono && (force || !isFocused(elements.cfgDono))) {
-                elements.cfgDono.value = config.numeroDono ? config.numeroDono.replace('@c.us', '') : '';
-            }
-            if (elements.cfgEndereco && (force || !isFocused(elements.cfgEndereco))) {
-                elements.cfgEndereco.value = config.endereco || '';
-            }
-            if (elements.cfgPix && (force || !isFocused(elements.cfgPix))) {
-                elements.cfgPix.value = config.chavePix || '';
-            }
-            if (elements.cfgMotivoFechado && (force || !isFocused(elements.cfgMotivoFechado))) {
-                elements.cfgMotivoFechado.value = config.motivoFechado || '';
-            }
-        }
-
-        // Status Fechado Hoje
-        updateClosedStatusUI(config.fechadoHoje, config.motivoFechado);
-
-        // Vagas e Horários Base
-        if (force || !isFocused(elements.inputNewTime)) {
-            state.horariosBase = Array.isArray(config.horariosBase) ? [...config.horariosBase] : [
-                "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
-            ];
-            renderSlotsChips(state.horariosBase);
-            renderWorkingDays(config.diasSemana || { 1: "Segunda", 2: "Terça", 3: "Quarta", 4: "Quinta", 5: "Sexta", 6: "Sábado" });
-        }
-
-        state.services = Array.isArray(config.servicos) ? config.servicos : [];
-        renderServicesList(state.services);
-        populateServiceSelect(state.services);
-    }
-
-    // ------------------------------------------------------------------
-    // Eventos: Modo Fechado Hoje & Editor de Vagas
-    // ------------------------------------------------------------------
-    async function toggleFechadoHoje() {
-        const isCurrentlyClosed = Boolean(state.config.fechadoHoje);
-        const novoStatus = !isCurrentlyClosed;
-        const motivo = elements.cfgMotivoFechado.value.trim() || 'Folga da equipe';
-
-        if (novoStatus) {
-            if (!confirm('Deseja realmente ativar o modo "HOJE ESTAMOS FECHADOS"? As vagas de hoje serão suspensas no bot e no painel.')) return;
-        }
-
-        try {
-            const res = await fetch('/api/config/fechado-hoje', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fechado: novoStatus,
-                    motivo: motivo
-                })
-            });
-            const result = await res.json();
-            if (result.success) {
-                state.config = result.config;
-                updateClosedStatusUI(result.fechadoHoje, result.motivoFechado);
-                showToast(novoStatus ? '🛑 Salão marcado como FECHADO hoje!' : '🟢 Salão REABERTO com sucesso!', novoStatus ? 'info' : 'success');
-                refreshData();
-            }
-        } catch (err) {
-            showToast('Erro ao alterar status de fechamento.', 'error');
-        }
-    }
-
-    elements.btnToggleFechadoHoje.addEventListener('click', toggleFechadoHoje);
-    if (elements.btnQuickReopen) {
-        elements.btnQuickReopen.addEventListener('click', toggleFechadoHoje);
-    }
-
-    // Adicionar Novo Horário
-    elements.btnAddSlotTime.addEventListener('click', () => {
-        const newTime = elements.inputNewTime.value;
-        if (!newTime) return;
-
-        if (state.horariosBase.includes(newTime)) {
-            showToast('Este horário já está na lista!', 'info');
-            return;
-        }
-
-        state.horariosBase.push(newTime);
-        renderSlotsChips(state.horariosBase);
-        showToast(`Horário ${newTime} adicionado! Clique em "Salvar Horários & Vagas Diárias" para aplicar.`, 'success');
-    });
-
-    // Presets Rápidos
-    elements.preset12Vagas.addEventListener('click', () => {
-        state.horariosBase = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
-        renderSlotsChips(state.horariosBase);
-        showToast('Predefinição de 12 Vagas (09h às 21h) aplicada!', 'info');
-    });
-
-    elements.preset8Vagas.addEventListener('click', () => {
-        state.horariosBase = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
-        renderSlotsChips(state.horariosBase);
-        showToast('Predefinição de 8 Vagas (09h às 18h) aplicada!', 'info');
-    });
-
-    elements.preset15Vagas.addEventListener('click', () => {
-        state.horariosBase = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
-        renderSlotsChips(state.horariosBase);
-        showToast('Predefinição de 15 Vagas (08h às 22h) aplicada!', 'info');
-    });
-
-    elements.preset30Min.addEventListener('click', () => {
-        state.horariosBase = [
-            "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-            "13:30", "14:00", "14:30", "15:00", "15:30", "16:00",
-            "16:30", "17:00", "17:30", "18:00", "18:30", "19:00"
-        ];
-        renderSlotsChips(state.horariosBase);
-        showToast('Predefinição de Intervalo 30min (18 Vagas) aplicada!', 'info');
-    });
-
-    // Salvar Vagas e Horários Base
-    elements.btnSaveSlots.addEventListener('click', async () => {
-        const diasSemana = {};
-        const checkboxes = elements.workingDaysContainer.querySelectorAll('input[type="checkbox"]');
-        const nomesDias = {
-            '0': 'Domingo',
-            '1': 'Segunda',
-            '2': 'Terça',
-            '3': 'Quarta',
-            '4': 'Quinta',
-            '5': 'Sexta',
-            '6': 'Sábado'
-        };
-
-        checkboxes.forEach(cb => {
-            if (cb.checked) {
-                const dayNum = cb.getAttribute('data-day');
-                diasSemana[dayNum] = nomesDias[dayNum];
-            }
-        });
-
-        if (state.horariosBase.length === 0) {
-            showToast('Cadastre ao menos um horário de atendimento!', 'error');
-            return;
-        }
-
-        try {
-            const res = await fetch('/api/config', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    horariosBase: state.horariosBase,
-                    diasSemana
-                })
-            });
-            const result = await res.json();
-            if (result.success) {
-                showToast(`✅ ${state.horariosBase.length} Vagas Diárias e Horários Salvos com Sucesso!`, 'success');
-                refreshData();
-            }
-        } catch (err) {
-            showToast('Erro ao salvar horários de atendimento.', 'error');
-        }
-    });
-
-    // ------------------------------------------------------------------
-    // Tab Navigation
-    // ------------------------------------------------------------------
-    const tabHeaders = {
-        'tab-qrcode': { title: 'Conexão WhatsApp & QR Code', sub: 'Escaneie o código para sincronizar o bot em tempo real' },
-        'tab-calendar': { title: 'Agenda & Horários Disponíveis', sub: 'Visão de horários com sistema anti-colisão em tempo real' },
-        'tab-appointments': { title: 'Todos os Agendamentos', sub: 'Gestão completa de clientes, status e atendimentos' },
-        'tab-simulator': { title: 'Simulador WhatsApp & Logs', sub: 'Teste as respostas do bot e monitore eventos em tempo real' },
-        'tab-settings': { title: 'Serviços & Configurações', sub: 'Edite o número de vagas, horários, modo fechado, valores e dados do salão' }
-    };
-
+    // Tabs Navigation
     elements.navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            const targetTab = btn.getAttribute('data-tab');
-            switchTab(targetTab);
+            const tabId = btn.getAttribute('data-tab');
+            switchTab(tabId);
         });
     });
 
     function switchTab(tabId) {
         state.currentTab = tabId;
+        elements.navBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-tab') === tabId));
+        elements.tabContents.forEach(tc => tc.classList.toggle('active', tc.id === tabId));
 
-        elements.navBtns.forEach(b => {
-            b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
-        });
-
-        elements.tabContents.forEach(content => {
-            content.classList.toggle('active', content.id === tabId);
-        });
-
-        if (tabHeaders[tabId]) {
-            elements.pageTitle.textContent = tabHeaders[tabId].title;
-            elements.pageSubtitle.textContent = tabHeaders[tabId].sub;
-        }
-
-        if (tabId === 'tab-calendar') {
-            loadSlotsForDate(state.selectedDate);
-            loadDaysList();
+        if (tabId === 'tab-qrcode') {
+            elements.pageTitle.textContent = 'Conexão WhatsApp & QR Code';
+            elements.pageSubtitle.textContent = 'Escaneie o código para ativar o bot de pedidos automáticos';
+        } else if (tabId === 'tab-calendar') {
+            elements.pageTitle.textContent = 'Cozinha & Pedidos ao Vivo';
+            elements.pageSubtitle.textContent = 'Painel em tempo real de pedidos de marmitex e pizzas';
+            renderLiveOrders();
         } else if (tabId === 'tab-appointments') {
-            loadAppointments();
+            elements.pageTitle.textContent = 'Histórico de Pedidos';
+            elements.pageSubtitle.textContent = 'Registro de todas as vendas, delivery e retiradas';
+            renderOrdersTable();
+        } else if (tabId === 'tab-simulator') {
+            elements.pageTitle.textContent = 'Simulador de WhatsApp & Logs';
+            elements.pageSubtitle.textContent = 'Teste o cardápio e faça pedidos como se fosse um cliente no WhatsApp';
+        } else if (tabId === 'tab-settings') {
+            elements.pageTitle.textContent = 'Cardápio & Restaurante';
+            elements.pageSubtitle.textContent = 'Personalize itens de marmitex, pizzas, taxas e horários';
+            renderMenuList();
         }
-    }
-
-    // ------------------------------------------------------------------
-    // Calendar & Slots View
-    // ------------------------------------------------------------------
-    async function loadDaysList() {
-        try {
-            const res = await fetch('/api/days');
-            const days = await res.json();
-            state.daysList = days;
-            renderDaysPills(days);
-        } catch (e) {
-            console.error("Erro ao carregar dias:", e);
-        }
-    }
-
-    function renderDaysPills(days) {
-        elements.quickDaysContainer.innerHTML = '';
-        const hojeStr = getTodayDateString();
-        const fechadoHoje = Boolean(state.config.fechadoHoje);
-
-        days.forEach((day) => {
-            const pill = document.createElement('div');
-            const isHoje = (day.dataStr === hojeStr);
-            const isClosed = isHoje && fechadoHoje;
-
-            pill.className = `day-pill ${day.dataStr === state.selectedDate ? 'active' : ''} ${isClosed ? 'closed' : ''}`;
-            
-            let vagasHtml = `<span class="pill-vagas">${day.vagasDisponiveis} vagas</span>`;
-            if (isClosed) {
-                vagasHtml = `<span class="pill-vagas" style="color: #F87171;">🔴 Fechado</span>`;
-            }
-
-            const dataPart = day.rotulo.includes('(') ? day.rotulo.split('(')[1].replace(')', '') : day.dataStr;
-
-            pill.innerHTML = `
-                <span class="pill-day-name">${day.nomeDia}</span>
-                <span class="pill-day-date">${dataPart}</span>
-                ${vagasHtml}
-            `;
-
-            pill.addEventListener('click', () => {
-                state.selectedDate = day.dataStr;
-                updateSelectedDateHeader();
-                document.querySelectorAll('.day-pill').forEach(p => p.classList.remove('active'));
-                pill.classList.add('active');
-                loadSlotsForDate(state.selectedDate);
-            });
-
-            elements.quickDaysContainer.appendChild(pill);
-        });
-    }
-
-    function updateSelectedDateHeader() {
-        const [ano, mes, dia] = state.selectedDate.split('-').map(Number);
-        const dataObj = new Date(ano, mes - 1, dia);
-
-        const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-        const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
-        const hojeStr = getTodayDateString();
-        const prefix = state.selectedDate === hojeStr ? 'Hoje, ' : '';
-
-        elements.calendarSelectedDateLabel.textContent = `${prefix}${diasSemana[dataObj.getDay()]}`;
-        elements.calendarSelectedDateSub.textContent = `${String(dia).padStart(2, '0')} de ${meses[mes - 1]} de ${ano}`;
-    }
-
-    async function loadSlotsForDate(dateStr) {
-        try {
-            updateSelectedDateHeader();
-            const hojeStr = getTodayDateString();
-            const isHoje = (dateStr === hojeStr);
-
-            if (isHoje && state.config.fechadoHoje) {
-                elements.calendarClosedAlert.classList.remove('hidden');
-                if (elements.calendarClosedReason) {
-                    elements.calendarClosedReason.textContent = `Atendimento presencial suspenso (${state.config.motivoFechado || 'Folga da equipe'}). Clientes no WhatsApp estão sendo orientados a agendar para os próximos dias.`;
-                }
-            } else {
-                elements.calendarClosedAlert.classList.add('hidden');
-            }
-
-            const res = await fetch(`/api/slots?date=${dateStr}`);
-            const data = await res.json();
-            renderSlotsGrid(data.slots);
-        } catch (err) {
-            console.error("Erro ao carregar slots:", err);
-        }
-    }
-
-    function renderSlotsGrid(slots) {
-        elements.slotsGridContainer.innerHTML = '';
-
-        if (!slots || slots.length === 0) {
-            elements.slotsGridContainer.innerHTML = `<div class="glass-card" style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 32px;">Nenhum horário disponível para esta data.</div>`;
-            return;
-        }
-
-        slots.forEach(slot => {
-            const card = document.createElement('div');
-            const isOccupied = slot.ocupado;
-
-            card.className = `slot-card ${isOccupied ? 'occupied' : 'available'}`;
-
-            if (isOccupied && slot.agendamento) {
-                const ag = slot.agendamento;
-                card.innerHTML = `
-                    <div class="slot-card-header">
-                        <span class="slot-time">⏰ ${slot.horario}</span>
-                        <span class="slot-badge occupied">Reservado</span>
-                    </div>
-                    <div class="slot-client-info">
-                        <strong>👤 ${ag.cliente}</strong>
-                        <span>📱 ${ag.telefone.replace('@c.us', '')}</span>
-                        <span class="slot-service-tag">${ag.servico} (R$ ${(ag.preco || 0).toFixed(2)})</span>
-                    </div>
-                    <div class="slot-actions">
-                        <button class="btn btn-danger-outline btn-sm" onclick="cancelarAgendamento('${ag.id}')">
-                            <i data-lucide="x"></i> Cancelar
-                        </button>
-                        <button class="btn btn-secondary btn-sm" onclick="concluirAgendamento('${ag.id}')">
-                            <i data-lucide="check"></i> Concluir
-                        </button>
-                    </div>
-                `;
-            } else {
-                card.innerHTML = `
-                    <div class="slot-card-header">
-                        <span class="slot-time">⏰ ${slot.horario}</span>
-                        <span class="slot-badge available">Livre</span>
-                    </div>
-                    <div class="slot-client-info">
-                        <strong>🛡️ Vaga Disponível</strong>
-                        <span>Pronto para agendamento via WhatsApp ou balcão</span>
-                    </div>
-                    <div class="slot-actions">
-                        <button class="btn btn-primary btn-sm" onclick="abrirModalAgendamentoParaHorario('${slot.horario}')">
-                            <i data-lucide="plus"></i> Agendar Cliente
-                        </button>
-                    </div>
-                `;
-            }
-
-            elements.slotsGridContainer.appendChild(card);
-        });
 
         if (window.lucide) lucide.createIcons();
     }
 
-    elements.btnPrevDay.addEventListener('click', () => {
-        changeDay(-1);
-    });
+    // ------------------------------------------------------------------
+    // API REST Calls
+    // ------------------------------------------------------------------
+    async function fetchStatus() {
+        try {
+            const res = await fetch(`/api/status?t=${Date.now()}`);
+            if (res.ok) {
+                const data = await res.json();
+                updateBotStatusUI(data);
+                if (data.stats) updateStatsUI(data.stats);
+            }
+        } catch (e) {}
+    }
 
-    elements.btnNextDay.addEventListener('click', () => {
-        changeDay(1);
-    });
+    async function fetchOrders() {
+        try {
+            const res = await fetch(`/api/orders?t=${Date.now()}`);
+            if (res.ok) {
+                state.orders = await res.json();
+                renderLiveOrders();
+                renderOrdersTable();
+            }
+        } catch (e) {}
+    }
 
-    function changeDay(delta) {
-        const [ano, mes, dia] = state.selectedDate.split('-').map(Number);
-        const dataObj = new Date(ano, mes - 1, dia);
-        dataObj.setDate(dataObj.getDate() + delta);
-        
-        const a = dataObj.getFullYear();
-        const m = String(dataObj.getMonth() + 1).padStart(2, '0');
-        const d = String(dataObj.getDate()).padStart(2, '0');
-        state.selectedDate = `${a}-${m}-${d}`;
+    async function fetchMenu() {
+        try {
+            const res = await fetch(`/api/menu?t=${Date.now()}`);
+            if (res.ok) {
+                state.menu = await res.json();
+                renderMenuList();
+                populateModalSelect();
+            }
+        } catch (e) {}
+    }
 
-        loadSlotsForDate(state.selectedDate);
-        loadDaysList();
+    async function fetchConfig() {
+        try {
+            const res = await fetch(`/api/config?t=${Date.now()}`);
+            if (res.ok) {
+                state.config = await res.json();
+                applyConfigToUI(state.config, true);
+            }
+        } catch (e) {}
+    }
+
+    async function refreshData() {
+        await Promise.all([fetchStatus(), fetchOrders(), fetchMenu(), fetchConfig()]);
     }
 
     // ------------------------------------------------------------------
-    // Appointments Table
+    // Bot Status & QR UI
     // ------------------------------------------------------------------
-    async function loadAppointments() {
-        const busca = elements.searchAppointments.value;
-        const status = elements.filterStatus.value;
-        const data = elements.filterDate.value;
+    function updateBotStatusUI(data) {
+        const status = data.status || 'DISCONNECTED';
+        state.botStatus = status;
 
-        const params = new URLSearchParams();
-        if (busca) params.append('busca', busca);
-        if (status) params.append('status', status);
-        if (data) params.append('data', data);
+        if (elements.statusPulse) {
+            elements.statusPulse.classList.toggle('online', status === 'READY');
+        }
 
-        try {
-            const res = await fetch(`/api/appointments?${params.toString()}`);
-            const ags = await res.json();
-            state.appointments = ags;
-            renderAppointmentsTable(ags);
-        } catch (err) {
-            console.error("Erro ao carregar agendamentos:", err);
+        if (status === 'READY') {
+            if (elements.sidebarStatusText) elements.sidebarStatusText.textContent = 'Bot Online & Ativo';
+            if (elements.sidebarStatusSubtext) elements.sidebarStatusSubtext.textContent = 'Recebendo pedidos';
+            if (elements.qrNavBadge) {
+                elements.qrNavBadge.textContent = 'ONLINE';
+                elements.qrNavBadge.style.background = 'var(--accent-emerald)';
+                elements.qrNavBadge.style.color = '#FFF';
+            }
+            if (elements.qrStatusPill) {
+                elements.qrStatusPill.className = 'connection-status-pill online';
+                elements.qrStatusPill.querySelector('.pill-text').textContent = 'Conectado';
+            }
+            if (elements.qrContainerWaiting) elements.qrContainerWaiting.classList.add('hidden');
+            if (elements.qrContainerConnected) elements.qrContainerConnected.classList.remove('hidden');
+
+            const info = data.userInfo || {};
+            if (elements.userPushname) elements.userPushname.textContent = info.pushname || 'Restaurante Bom Sabor';
+            if (elements.userPhone) elements.userPhone.textContent = info.wid ? info.wid.replace('@c.us', '') : '--';
+            if (elements.userPlatform) elements.userPlatform.textContent = info.platform || 'WhatsApp Web';
+        } else {
+            if (elements.sidebarStatusText) elements.sidebarStatusText.textContent = status === 'QR_READY' ? 'Aguardando QR Code' : 'Desconectado';
+            if (elements.sidebarStatusSubtext) elements.sidebarStatusSubtext.textContent = 'Escaneie para conectar';
+            if (elements.qrNavBadge) {
+                elements.qrNavBadge.textContent = 'QR';
+                elements.qrNavBadge.style.background = '';
+                elements.qrNavBadge.style.color = '';
+            }
+            if (elements.qrStatusPill) {
+                elements.qrStatusPill.className = 'connection-status-pill';
+                elements.qrStatusPill.querySelector('.pill-text').textContent = 'Aguardando QR';
+            }
+            if (elements.qrContainerWaiting) elements.qrContainerWaiting.classList.remove('hidden');
+            if (elements.qrContainerConnected) elements.qrContainerConnected.classList.add('hidden');
+
+            if (data.qrImage) {
+                updateQrUI({ qrImage: data.qrImage });
+            }
         }
     }
 
-    function renderAppointmentsTable(ags) {
-        elements.appointmentsTableBody.innerHTML = '';
+    function updateQrUI(data) {
+        if (data.qrImage && elements.qrImage) {
+            elements.qrImage.src = data.qrImage;
+            elements.qrImage.classList.remove('hidden');
+            if (elements.qrLoader) elements.qrLoader.classList.add('hidden');
+            if (elements.qrProgress) {
+                elements.qrProgress.style.transition = 'none';
+                elements.qrProgress.style.width = '100%';
+                setTimeout(() => {
+                    elements.qrProgress.style.transition = 'width 25s linear';
+                    elements.qrProgress.style.width = '0%';
+                }, 50);
+            }
+        }
+    }
 
-        if (!ags || ags.length === 0) {
-            elements.appointmentsTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 32px;">Nenhum agendamento encontrado.</td></tr>`;
+    function updateStatsUI(stats) {
+        state.stats = stats;
+        if (elements.statHoje) elements.statHoje.textContent = stats.pedidosHoje || 0;
+        if (elements.statLivres) elements.statLivres.textContent = stats.pedidosPendentes || 0;
+        if (elements.statTotal) elements.statTotal.textContent = stats.pedidosConcluidos || 0;
+        if (elements.statFaturamento) elements.statFaturamento.textContent = formatarMoeda(stats.faturamentoHoje || 0);
+        if (elements.todayCountBadge) elements.todayCountBadge.textContent = stats.pedidosPendentes || 0;
+    }
+
+    function applyConfigToUI(cfg, fillForm = true) {
+        const nome = cfg.nomeRestaurante || 'Restaurante Bom Sabor';
+        if (elements.sidebarSalonName) elements.sidebarSalonName.textContent = nome;
+        if (elements.simBarberTitle) elements.simBarberTitle.textContent = nome;
+
+        // Fechado hoje
+        const fechado = Boolean(cfg.fechadoHoje);
+        if (elements.badgeStatusFechado) {
+            elements.badgeStatusFechado.className = `closed-status-pill ${fechado ? 'closed' : 'open'}`;
+            if (elements.txtBadgeStatusFechado) {
+                elements.txtBadgeStatusFechado.textContent = fechado ? '🛑 Restaurante Fechado Hoje' : '🟢 Restaurante Aberto';
+            }
+        }
+        if (elements.btnToggleFechadoHoje && elements.txtBtnToggleFechado) {
+            elements.btnToggleFechadoHoje.className = fechado ? 'btn btn-secondary' : 'btn btn-danger-solid';
+            elements.txtBtnToggleFechado.textContent = fechado ? '🟢 Reabrir Restaurante Hoje' : '🛑 Ativar Modo: RESTAURANTE FECHADO HOJE';
+        }
+        if (elements.calendarClosedAlert) {
+            elements.calendarClosedAlert.classList.toggle('hidden', !fechado);
+            if (elements.calendarClosedReason) {
+                elements.calendarClosedReason.textContent = cfg.motivoFechado || 'Atendimento pausado pelo administrador.';
+            }
+        }
+
+        if (fillForm) {
+            if (elements.cfgNome) elements.cfgNome.value = cfg.nomeRestaurante || '';
+            if (elements.cfgDono) elements.cfgDono.value = cfg.numeroDono ? cfg.numeroDono.replace('@c.us', '') : '';
+            if (elements.cfgEndereco) elements.cfgEndereco.value = cfg.endereco || '';
+            if (elements.cfgTaxa) elements.cfgTaxa.value = cfg.taxaEntregaPadrao || 5.00;
+            if (elements.cfgPix) elements.cfgPix.value = cfg.chavePix || '';
+            if (elements.cfgAlmoco) elements.cfgAlmoco.value = cfg.horarioAlmoco || '11:00 às 15:00';
+            if (elements.cfgJantar) elements.cfgJantar.value = cfg.horarioJantar || '18:00 às 23:30';
+            if (elements.cfgMotivoFechado) elements.cfgMotivoFechado.value = cfg.motivoFechado || '';
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // RENDER: COZINHA & PEDIDOS AO VIVO
+    // ------------------------------------------------------------------
+    function renderLiveOrders() {
+        if (!elements.slotsGridContainer) return;
+
+        const pedidosHoje = state.orders.filter(p => p.status !== 'cancelado' && p.status !== 'concluido');
+
+        if (pedidosHoje.length === 0) {
+            elements.slotsGridContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: var(--bg-surface); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+                    <div style="font-size: 42px; margin-bottom: 12px;">👨‍🍳🍽️</div>
+                    <h3 style="font-size: 1.2rem; margin-bottom: 6px;">Nenhum pedido pendente no momento</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Os novos pedidos de Marmitex e Pizza realizados pelo WhatsApp aparecerão aqui instantaneamente!</p>
+                </div>
+            `;
             return;
         }
 
-        ags.forEach(ag => {
-            const tr = document.createElement('tr');
-            const [ano, mes, dia] = ag.data.split('-');
-            const dataFormatada = `${dia}/${mes}/${ano}`;
+        elements.slotsGridContainer.innerHTML = pedidosHoje.map(ped => {
+            const statusClass = ped.status || 'pendente';
+            const statusLabels = {
+                'pendente': '🟡 Pendente (Cozinha)',
+                'em_preparo': '👨‍🍳 Em Preparo',
+                'saiu_entrega': '🛵 Saiu p/ Entrega'
+            };
 
-            let statusBadge = `<span class="badge-status ${ag.status}">${ag.status.toUpperCase()}</span>`;
+            const tipoEntregaTxt = ped.tipoEntrega === 'delivery' 
+                ? `🛵 <strong>Delivery:</strong> ${escapeHtml(ped.enderecoEntrega || 'Endereço informado')}`
+                : `🛍️ <strong>Retirada no Balcão</strong>`;
 
-            tr.innerHTML = `
-                <td><strong>${dataFormatada}</strong> às ${ag.horario}</td>
-                <td><strong>${ag.cliente}</strong></td>
-                <td>${ag.telefone.replace('@c.us', '')}</td>
-                <td>${ag.servico}</td>
-                <td>R$ ${(ag.preco || 0).toFixed(2)}</td>
-                <td><span class="badge-pro" style="background: var(--bg-surface-elevated); color: var(--text-secondary);">${ag.origem || 'whatsapp'}</span></td>
-                <td>${statusBadge}</td>
-                <td>
-                    <div style="display: flex; gap: 6px;">
-                        ${ag.status === 'confirmado' ? `
-                            <button class="btn btn-secondary btn-sm" onclick="concluirAgendamento('${ag.id}')" title="Marcar como atendido">
-                                <i data-lucide="check"></i>
-                            </button>
-                            <button class="btn btn-danger-outline btn-sm" onclick="cancelarAgendamento('${ag.id}')" title="Cancelar agendamento">
-                                <i data-lucide="trash-2"></i>
+            return `
+                <div class="order-live-card">
+                    <div class="order-card-header">
+                        <div>
+                            <span class="order-code">${escapeHtml(ped.codigo || '#PED')}</span>
+                            <span class="order-time">⏰ ${escapeHtml(ped.horario || '')}</span>
+                        </div>
+                        <span class="order-status-badge ${statusClass}">${statusLabels[statusClass] || statusClass}</span>
+                    </div>
+
+                    <div style="font-size: 0.95rem; font-weight: 600;">
+                        👤 ${escapeHtml(ped.cliente)} &nbsp;
+                        <small style="color: var(--text-muted); font-weight: normal;">(${escapeHtml((ped.telefone || '').replace('@c.us', ''))})</small>
+                    </div>
+
+                    <div class="order-items-box">
+                        🍽️ <strong>Itens:</strong><br>
+                        ${escapeHtml(ped.servico || 'Refeição')}
+                    </div>
+
+                    <div class="order-address-box">
+                        ${tipoEntregaTxt}<br>
+                        💳 <strong>Pagamento:</strong> ${escapeHtml(ped.formaPagamento || 'PIX')}
+                    </div>
+
+                    <div class="order-total-row">
+                        <span>Total a Receber:</span>
+                        <span style="color: var(--neon-amber);">${formatarMoeda(ped.total || ped.preco)}</span>
+                    </div>
+
+                    <div class="order-actions-row">
+                        ${ped.status === 'pendente' ? `
+                            <button class="btn btn-primary btn-xs btn-change-status" data-id="${ped.id}" data-status="em_preparo">
+                                👨‍🍳 Iniciar Preparo
                             </button>
                         ` : ''}
+                        ${ped.status === 'em_preparo' ? `
+                            <button class="btn btn-secondary btn-xs btn-change-status" data-id="${ped.id}" data-status="saiu_entrega">
+                                🛵 Saiu p/ Entrega
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-secondary btn-xs btn-change-status" data-id="${ped.id}" data-status="concluido" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald);">
+                            ✅ Entregue
+                        </button>
+                        <button class="btn btn-danger-outline btn-xs btn-change-status" data-id="${ped.id}" data-status="cancelado">
+                            ❌ Cancelar
+                        </button>
                     </div>
-                </td>
+                </div>
             `;
+        }).join('');
 
-            elements.appointmentsTableBody.appendChild(tr);
+        // Event listeners para alterar status
+        document.querySelectorAll('.btn-change-status').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                const status = e.currentTarget.getAttribute('data-status');
+                await alterarStatusPedido(id, status);
+            });
         });
 
         if (window.lucide) lucide.createIcons();
     }
 
-    elements.searchAppointments.addEventListener('input', debounce(loadAppointments, 300));
-    elements.filterStatus.addEventListener('change', loadAppointments);
-    elements.filterDate.addEventListener('change', loadAppointments);
-
-    // ------------------------------------------------------------------
-    // Actions: Cancel & Conclude
-    // ------------------------------------------------------------------
-    window.cancelarAgendamento = async function(id) {
-        if (!confirm('Deseja realmente cancelar este agendamento? O horário será liberado imediatamente.')) return;
-
+    async function alterarStatusPedido(id, status) {
         try {
-            const res = await fetch(`/api/appointments/${id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) {
-                showToast('Agendamento cancelado com sucesso. Horário liberado!', 'info');
-                refreshData();
+            const res = await fetch(`/api/orders/${id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status, avisarCliente: true })
+            });
+
+            if (res.ok) {
+                showToast(`Status do pedido atualizado para ${status}!`, 'success');
+                fetchOrders();
             } else {
-                showToast(result.error || 'Erro ao cancelar', 'error');
+                showToast('Erro ao atualizar status do pedido.', 'error');
             }
         } catch (err) {
-            showToast('Erro de comunicação', 'error');
+            showToast('Erro de conexão ao atualizar pedido.', 'error');
         }
-    };
+    }
 
-    window.concluirAgendamento = async function(id) {
-        try {
-            const res = await fetch(`/api/appointments/${id}/concluir`, { method: 'PUT' });
-            const result = await res.json();
-            if (result.success) {
-                showToast('Atendimento concluído!', 'success');
-                refreshData();
+    // ------------------------------------------------------------------
+    // RENDER: HISTÓRICO DE PEDIDOS (TABELA)
+    // ------------------------------------------------------------------
+    function renderOrdersTable() {
+        if (!elements.appointmentsTableBody) return;
+
+        let lista = [...state.orders];
+        const statusFiltro = elements.filterStatus ? elements.filterStatus.value : '';
+        const dataFiltro = elements.filterDate ? elements.filterDate.value : '';
+        const buscaFiltro = elements.searchAppointments ? elements.searchAppointments.value.toLowerCase() : '';
+
+        if (statusFiltro) lista = lista.filter(p => p.status === statusFiltro);
+        if (dataFiltro) lista = lista.filter(p => p.data === dataFiltro);
+        if (buscaFiltro) {
+            lista = lista.filter(p =>
+                (p.cliente && p.cliente.toLowerCase().includes(buscaFiltro)) ||
+                (p.codigo && p.codigo.toLowerCase().includes(buscaFiltro)) ||
+                (p.servico && p.servico.toLowerCase().includes(buscaFiltro)) ||
+                (p.telefone && p.telefone.includes(buscaFiltro))
+            );
+        }
+
+        if (lista.length === 0) {
+            elements.appointmentsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                        Nenhum pedido encontrado com os filtros selecionados.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        elements.appointmentsTableBody.innerHTML = lista.map(ped => {
+            const statusLabels = {
+                'pendente': '<span class="order-status-badge pendente">🟡 Pendente</span>',
+                'em_preparo': '<span class="order-status-badge em_preparo">👨‍🍳 Preparando</span>',
+                'saiu_entrega': '<span class="order-status-badge saiu_entrega">🛵 A Caminho</span>',
+                'concluido': '<span class="order-status-badge concluido">✅ Entregue</span>',
+                'cancelado': '<span class="order-status-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--accent-rose);">❌ Cancelado</span>'
+            };
+
+            const tipoTxt = ped.tipoEntrega === 'delivery' ? `🛵 Delivery (${escapeHtml(ped.enderecoEntrega || '')})` : `🛍️ Balcão`;
+
+            return `
+                <tr>
+                    <td>
+                        <strong>${escapeHtml(ped.codigo || '#PED')}</strong><br>
+                        <small style="color: var(--text-muted);">${escapeHtml(ped.data || '')} ${escapeHtml(ped.horario || '')}</small>
+                    </td>
+                    <td><strong>${escapeHtml(ped.cliente)}</strong></td>
+                    <td>${escapeHtml((ped.telefone || '').replace('@c.us', ''))}</td>
+                    <td style="max-width: 250px;">${escapeHtml(ped.servico || '')}</td>
+                    <td style="max-width: 200px;"><small>${tipoTxt}</small></td>
+                    <td><strong style="color: var(--neon-amber);">${formatarMoeda(ped.total || ped.preco)}</strong></td>
+                    <td><small>${escapeHtml(ped.formaPagamento || 'PIX')}</small></td>
+                    <td>${statusLabels[ped.status] || ped.status}</td>
+                    <td>
+                        ${ped.status !== 'concluido' && ped.status !== 'cancelado' ? `
+                            <button class="btn btn-secondary btn-xs btn-table-concluir" data-id="${ped.id}" title="Concluir">
+                                <i data-lucide="check"></i>
+                            </button>
+                            <button class="btn btn-danger-outline btn-xs btn-table-cancelar" data-id="${ped.id}" title="Cancelar">
+                                <i data-lucide="x"></i>
+                            </button>
+                        ` : '—'}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        document.querySelectorAll('.btn-table-concluir').forEach(btn => {
+            btn.addEventListener('click', () => alterarStatusPedido(btn.getAttribute('data-id'), 'concluido'));
+        });
+        document.querySelectorAll('.btn-table-cancelar').forEach(btn => {
+            btn.addEventListener('click', () => alterarStatusPedido(btn.getAttribute('data-id'), 'cancelado'));
+        });
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    if (elements.filterStatus) elements.filterStatus.addEventListener('change', renderOrdersTable);
+    if (elements.filterDate) elements.filterDate.addEventListener('change', renderOrdersTable);
+    if (elements.searchAppointments) elements.searchAppointments.addEventListener('input', renderOrdersTable);
+
+    // ------------------------------------------------------------------
+    // RENDER: CARDÁPIO (MARMITEX, PIZZAS & BEBIDAS)
+    // ------------------------------------------------------------------
+    function renderMenuList() {
+        if (!elements.servicesListContainer) return;
+
+        let itens = [...state.menu];
+        if (state.activeMenuFilter !== 'todos') {
+            if (state.activeMenuFilter === 'marmitex') itens = itens.filter(i => i.categoria === 'marmitex');
+            if (state.activeMenuFilter === 'pizza') itens = itens.filter(i => i.categoria === 'pizza');
+            if (state.activeMenuFilter === 'bebidas') itens = itens.filter(i => i.categoria === 'bebida' || i.categoria === 'extra');
+        }
+
+        elements.servicesListContainer.innerHTML = itens.map(it => {
+            return `
+                <div class="service-card-item">
+                    <div class="service-card-info">
+                        <strong>${it.icone || '🍽️'} ${escapeHtml(it.nome)}</strong>
+                        <span>${escapeHtml(it.descricao || '')}</span>
+                    </div>
+                    <div class="service-card-price">
+                        ${formatarMoeda(it.preco)}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function setupMenuFilters() {
+        const btns = [
+            { el: elements.btnFilterMarmitex, val: 'marmitex' },
+            { el: elements.btnFilterPizza, val: 'pizza' },
+            { el: elements.btnFilterBebidas, val: 'bebidas' },
+            { el: elements.btnFilterTodos, val: 'todos' }
+        ];
+
+        btns.forEach(b => {
+            if (b.el) {
+                b.el.addEventListener('click', () => {
+                    btns.forEach(x => { if (x.el) x.el.classList.remove('active'); });
+                    b.el.classList.add('active');
+                    state.activeMenuFilter = b.val;
+                    renderMenuList();
+                });
             }
-        } catch (err) {
-            showToast('Erro de comunicação', 'error');
-        }
-    };
+        });
+    }
+    setupMenuFilters();
+
+    function populateModalSelect() {
+        if (!elements.modalServico) return;
+        elements.modalServico.innerHTML = state.menu.map(it => {
+            return `<option value="${it.id}">${it.icone || ''} ${escapeHtml(it.nome)} — ${formatarMoeda(it.preco)}</option>`;
+        }).join('');
+    }
 
     // ------------------------------------------------------------------
-    // WhatsApp Simulator
+    // SIMULADOR DE WHATSAPP
     // ------------------------------------------------------------------
-    async function sendSimulatorMessage() {
-        const msg = elements.simInput.value.trim();
-        if (!msg) return;
+    async function enviarMensagemSimulador() {
+        const input = elements.simInput;
+        if (!input) return;
+        const txt = input.value.trim();
+        if (!txt) return;
 
-        appendChatBubble('outgoing', msg);
-        elements.simInput.value = '';
+        input.value = '';
+
+        // Adiciona bolha do usuário
+        const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const userBubble = document.createElement('div');
+        userBubble.className = 'chat-bubble outgoing';
+        userBubble.innerHTML = `<div class="bubble-text">${escapeHtml(txt)}</div><span class="bubble-time">${hora}</span>`;
+        elements.simMessagesBody.appendChild(userBubble);
+        elements.simMessagesBody.scrollTop = elements.simMessagesBody.scrollHeight;
 
         try {
             const res = await fetch('/api/simulator/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    mensagem: msg,
-                    telefone: '5511999998888@c.us',
-                    nome: 'Cliente Simulador'
+                    mensagem: txt,
+                    nome: 'Cliente Navegador'
                 })
             });
 
-            const data = await res.json();
-            if (data.success && data.respostas) {
-                data.respostas.forEach(r => {
-                    appendChatBubble('incoming', r.texto);
+            if (res.ok) {
+                const data = await res.json();
+                (data.respostas || []).forEach(resp => {
+                    const botBubble = document.createElement('div');
+                    botBubble.className = 'chat-bubble incoming';
+                    const textoFormatado = resp.texto
+                        .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+                        .replace(/_(.*?)_/g, '<em>$1</em>')
+                        .replace(/`(.*?)`/g, '<code>$1</code>')
+                        .replace(/\n/g, '<br>');
+                    botBubble.innerHTML = `<div class="bubble-text">${textoFormatado}</div><span class="bubble-time">${hora}</span>`;
+                    elements.simMessagesBody.appendChild(botBubble);
                 });
+                elements.simMessagesBody.scrollTop = elements.simMessagesBody.scrollHeight;
             }
-        } catch (err) {
-            appendChatBubble('incoming', '❌ Erro ao processar mensagem no simulador.');
-        }
+        } catch (err) {}
     }
 
-    function appendChatBubble(type, text) {
-        const bubble = document.createElement('div');
-        bubble.className = `chat-bubble ${type}`;
-        const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        
-        bubble.innerHTML = `
-            <div class="bubble-text">${escapeHtml(text)}</div>
-            <span class="bubble-time">${time}</span>
-        `;
-
-        elements.simMessagesBody.appendChild(bubble);
-        elements.simMessagesBody.scrollTop = elements.simMessagesBody.scrollHeight;
-    }
-
-    elements.btnSimSend.addEventListener('click', sendSimulatorMessage);
-    elements.simInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') sendSimulatorMessage();
-    });
-
-    elements.btnClearLogs.addEventListener('click', () => {
-        elements.logsConsole.innerHTML = '';
-    });
-
-    // ------------------------------------------------------------------
-    // Modal Novo Agendamento
-    // ------------------------------------------------------------------
-    elements.btnModalNovoAgendamento.addEventListener('click', () => {
-        abrirModalAgendamentoParaHorario();
-    });
-
-    window.abrirModalAgendamentoParaHorario = async function(horarioSugerido = '') {
-        elements.modalData.value = state.selectedDate;
-        await atualizarHorariosModal(state.selectedDate, horarioSugerido);
-        elements.modalAgendamento.classList.remove('hidden');
-    };
-
-    elements.btnCloseModal.addEventListener('click', () => elements.modalAgendamento.classList.add('hidden'));
-    elements.btnCancelModal.addEventListener('click', () => elements.modalAgendamento.classList.add('hidden'));
-
-    elements.modalData.addEventListener('change', async () => {
-        await atualizarHorariosModal(elements.modalData.value);
-    });
-
-    async function atualizarHorariosModal(dataStr, horarioPreSelecionado = '') {
-        try {
-            const res = await fetch(`/api/slots?date=${dataStr}`);
-            const data = await res.json();
-            elements.modalHorario.innerHTML = '';
-
-            const livres = (data.slots || []).filter(s => s.disponivel);
-
-            if (livres.length === 0) {
-                elements.modalHorario.innerHTML = '<option value="">Nenhum horário livre para esta data</option>';
-                return;
-            }
-
-            livres.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.horario;
-                opt.textContent = `⏰ ${s.horario} (Livre)`;
-                if (s.horario === horarioPreSelecionado) opt.selected = true;
-                elements.modalHorario.appendChild(opt);
-            });
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    function populateServiceSelect(services) {
-        elements.modalServico.innerHTML = '';
-        services.forEach(s => {
-            const opt = document.createElement('option');
-            opt.value = JSON.stringify(s);
-            opt.textContent = `${s.icone || '✂️'} ${s.nome} — R$ ${s.preco.toFixed(2)}`;
-            elements.modalServico.appendChild(opt);
+    if (elements.btnSimSend) elements.btnSimSend.addEventListener('click', enviarMensagemSimulador);
+    if (elements.simInput) {
+        elements.simInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') enviarMensagemSimulador();
         });
     }
 
-    elements.formNovoAgendamento.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const cliente = elements.modalCliente.value.trim();
-        const telefone = elements.modalTelefone.value.trim() || '11999999999';
-        const data = elements.modalData.value;
-        const horario = elements.modalHorario.value;
-        const servicoObj = JSON.parse(elements.modalServico.value || '{}');
-
-        if (!data || !horario) {
-            showToast('Selecione uma data e horário válidos!', 'error');
-            return;
-        }
-
-        try {
-            const res = await fetch('/api/appointments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    cliente,
-                    telefone,
-                    data,
-                    horario,
-                    servico: servicoObj.nome || 'Corte Tradicional',
-                    preco: servicoObj.preco || 35
-                })
-            });
-
-            const result = await res.json();
-            if (result.success) {
-                showToast('Agendamento criado com sucesso!', 'success');
-                elements.modalAgendamento.classList.add('hidden');
-                elements.formNovoAgendamento.reset();
-                refreshData();
-            } else {
-                showToast(result.error || 'Horário indisponível!', 'error');
-            }
-        } catch (err) {
-            showToast('Erro ao criar agendamento.', 'error');
-        }
-    });
-
-    // ------------------------------------------------------------------
-    // Serviços List
-    // ------------------------------------------------------------------
-    function renderServicesList(services) {
-        elements.servicesListContainer.innerHTML = '';
-        services.forEach((s) => {
-            const row = document.createElement('div');
-            row.className = 'service-item-row';
-            row.innerHTML = `
-                <span class="service-item-icon">${s.icone || '✂️'}</span>
-                <div class="service-item-info">
-                    <strong>${s.nome}</strong>
-                    <span>Duração: ${s.duracao || '30 min'}</span>
-                </div>
-                <div class="service-item-price">R$ ${s.preco.toFixed(2)}</div>
-                <button class="btn btn-danger-outline btn-sm" onclick="removerServico(${s.id})">
-                    <i data-lucide="trash"></i>
-                </button>
-            `;
-            elements.servicesListContainer.appendChild(row);
+    if (elements.btnClearLogs) {
+        elements.btnClearLogs.addEventListener('click', () => {
+            if (elements.logsConsole) elements.logsConsole.innerHTML = '';
         });
-        if (window.lucide) lucide.createIcons();
-    }
-
-    window.removerServico = function(id) {
-        state.services = state.services.filter(s => s.id !== id);
-        renderServicesList(state.services);
-        salvarConfiguracoesGerais();
-    };
-
-    elements.btnAddService.addEventListener('click', () => {
-        const nome = prompt('Nome do Serviço (ex: Barboterapia Especial):');
-        if (!nome) return;
-        const preco = parseFloat(prompt('Valor do Serviço (ex: 45):') || '0');
-        const duracao = prompt('Duração média (ex: 45 min):') || '45 min';
-
-        const novo = {
-            id: Date.now(),
-            nome,
-            preco: preco || 35,
-            duracao,
-            icone: '💈'
-        };
-
-        state.services.push(novo);
-        renderServicesList(state.services);
-        salvarConfiguracoesGerais();
-    });
-
-    elements.formConfigGeral.addEventListener('submit', (e) => {
-        e.preventDefault();
-        salvarConfiguracoesGerais();
-    });
-
-    async function salvarConfiguracoesGerais() {
-        const btnSubmit = elements.formConfigGeral.querySelector('button[type="submit"]');
-        let originalBtnHtml = '';
-        if (btnSubmit) {
-            originalBtnHtml = btnSubmit.innerHTML;
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = `<i data-lucide="loader-2" class="spin"></i> Salvando...`;
-            if (window.lucide) lucide.createIcons();
-        }
-
-        let rawPhone = elements.cfgDono.value.trim().replace(/\D/g, '');
-        if (rawPhone && !rawPhone.startsWith('55') && (rawPhone.length === 10 || rawPhone.length === 11)) {
-            rawPhone = '55' + rawPhone;
-        }
-
-        const configData = {
-            nomeSalao: elements.cfgNome.value.trim() || 'Barbearia',
-            numeroDono: rawPhone ? `${rawPhone}@c.us` : '',
-            endereco: elements.cfgEndereco.value.trim(),
-            chavePix: elements.cfgPix.value.trim(),
-            motivoFechado: elements.cfgMotivoFechado ? elements.cfgMotivoFechado.value.trim() : (state.config.motivoFechado || ''),
-            servicos: state.services,
-            horariosBase: state.horariosBase,
-            diasSemana: state.config.diasSemana
-        };
-
-        try {
-            const res = await fetch('/api/config', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(configData)
-            });
-            const result = await res.json();
-            if (result.success) {
-                state.config = result.config;
-                applyConfigToUI(result.config, true);
-                showToast('✅ Informações da Barbearia salvas com sucesso!', 'success');
-            } else {
-                showToast(result.error || 'Erro ao salvar informações.', 'error');
-            }
-        } catch (err) {
-            showToast('Erro de conexão ao salvar informações.', 'error');
-        } finally {
-            if (btnSubmit) {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = originalBtnHtml;
-                if (window.lucide) lucide.createIcons();
-            }
-        }
     }
 
     // ------------------------------------------------------------------
-    // Bot Management (Restart / Logout)
+    // CONFIGURAÇÕES GERAIS E TOGGLE FECHADO
     // ------------------------------------------------------------------
-    elements.btnRestartBot.addEventListener('click', async () => {
-        if (!confirm('Deseja reiniciar o bot do WhatsApp?')) return;
-        showToast('Reiniciando conexão...', 'info');
-        await fetch('/api/bot/restart', { method: 'POST' });
-    });
-
-    elements.btnLogoutBot.addEventListener('click', async () => {
-        if (!confirm('Deseja desconectar a sessão do WhatsApp? Será necessário ler o QR code novamente.')) return;
-        showToast('Desconectando WhatsApp...', 'info');
-        await fetch('/api/bot/logout', { method: 'POST' });
-    });
-
-    elements.btnManualRefreshQr.addEventListener('click', async () => {
-        showToast('🔄 Verificando QR Code atualizado...', 'info');
-        try {
-            await fetchStatus();
-            if (state.botStatus === 'QR_READY' || state.botStatus === 'INITIALIZING') {
-                elements.qrImage.src = `/api/qr.png?t=${Date.now()}`;
-            }
-        } catch (e) {
-            console.error("Erro ao atualizar QR Code:", e);
-        }
-    });
-
-    elements.btnRefreshAll.addEventListener('click', () => {
-        refreshData(true);
-        showToast('Dados atualizados!', 'info');
-    });
-
-    // ------------------------------------------------------------------
-    // Global Refresh & Initial Load
-    // ------------------------------------------------------------------
-    async function refreshData(forceConfig = false) {
-        await Promise.all([
-            fetchStatus(),
-            fetchConfig(forceConfig),
-            loadDaysList(),
-            loadSlotsForDate(state.selectedDate),
-            loadAppointments()
-        ]);
-    }
-
-    async function fetchStatus() {
-        try {
-            const res = await fetch('/api/status?t=' + Date.now(), { cache: 'no-store' });
-            const data = await res.json();
-            updateBotStatusUI(data);
-            if (data.stats) updateStatsUI(data.stats);
-        } catch (e) {
-            console.error("Erro ao obter status do bot:", e);
-        }
-    }
-
-    async function fetchConfig(force = false) {
-        try {
-            const resCfg = await fetch('/api/config?t=' + Date.now(), { cache: 'no-store' });
-            const cfg = await resCfg.json();
-            state.config = cfg;
-            applyConfigToUI(cfg, force);
-        } catch (e) {
-            console.error("Erro ao carregar configurações:", e);
-        }
-    }
-
-    // ------------------------------------------------------------------
-    // Auto-Sync Polling Loop (Garante sincronização de status sem resetar formulários)
-    // ------------------------------------------------------------------
-    setInterval(() => {
-        const isWaiting = (state.botStatus === 'INITIALIZING' || 
-                           state.botStatus === 'QR_READY' || 
-                           state.botStatus === 'DISCONNECTED' ||
-                           elements.qrImage.classList.contains('hidden'));
-        
-        if (isWaiting) {
-            fetchStatus();
-        }
-    }, 1500);
-
-    // Polling regular para estatísticas e agendamentos (a cada 8 segundos)
-    setInterval(() => {
-        if (state.botStatus === 'READY' || state.botStatus === 'AUTHENTICATED') {
-            fetchStatus();
-            if (state.currentTab === 'tab-calendar') {
-                loadSlotsForDate(state.selectedDate);
-            } else if (state.currentTab === 'tab-appointments') {
-                loadAppointments();
-            }
-        }
-    }, 8000);
-
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
+    if (elements.formConfigGeral) {
+        elements.formConfigGeral.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                nomeRestaurante: elements.cfgNome.value,
+                numeroDono: elements.cfgDono.value ? `${elements.cfgDono.value.replace(/\D/g, '')}@c.us` : '',
+                endereco: elements.cfgEndereco.value,
+                taxaEntregaPadrao: Number(elements.cfgTaxa.value) || 5.00,
+                chavePix: elements.cfgPix.value,
+                horarioAlmoco: elements.cfgAlmoco.value,
+                horarioJantar: elements.cfgJantar.value
             };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+
+            try {
+                const res = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    showToast('Configurações do restaurante salvas com sucesso!', 'success');
+                }
+            } catch (err) {
+                showToast('Erro ao salvar configurações.', 'error');
+            }
+        });
     }
 
-    // Inicialização imediata (com force = true para preencher os formulários na abertura)
-    refreshData(true);
+    if (elements.btnToggleFechadoHoje) {
+        elements.btnToggleFechadoHoje.addEventListener('click', async () => {
+            const novoFechado = !state.config.fechadoHoje;
+            const motivo = elements.cfgMotivoFechado ? elements.cfgMotivoFechado.value : 'Folga/Manutenção';
+
+            try {
+                const res = await fetch('/api/config/fechado-hoje', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fechado: novoFechado, motivo })
+                });
+                if (res.ok) {
+                    showToast(novoFechado ? 'Modo FECHADO ativado!' : 'Restaurante reaberto com sucesso!', 'success');
+                    fetchConfig();
+                }
+            } catch (err) {}
+        });
+    }
+
+    if (elements.btnQuickReopen) {
+        elements.btnQuickReopen.addEventListener('click', async () => {
+            await fetch('/api/config/fechado-hoje', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fechado: false })
+            });
+            fetchConfig();
+        });
+    }
+
+    // Modal de Novo Pedido
+    if (elements.btnModalNovoAgendamento) {
+        elements.btnModalNovoAgendamento.addEventListener('click', () => {
+            if (elements.modalAgendamento) elements.modalAgendamento.classList.remove('hidden');
+        });
+    }
+    if (elements.btnCloseModal) elements.btnCloseModal.addEventListener('click', () => elements.modalAgendamento.classList.add('hidden'));
+    if (elements.btnCancelModal) elements.btnCancelModal.addEventListener('click', () => elements.modalAgendamento.classList.add('hidden'));
+
+    if (elements.modalTipoEntrega) {
+        elements.modalTipoEntrega.addEventListener('change', (e) => {
+            if (elements.modalGroupEndereco) {
+                elements.modalGroupEndereco.style.display = e.target.value === 'delivery' ? 'block' : 'none';
+            }
+        });
+    }
+
+    if (elements.formNovoAgendamento) {
+        elements.formNovoAgendamento.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cliente = elements.modalCliente.value;
+            const telefone = elements.modalTelefone.value;
+            const tipoEntrega = elements.modalTipoEntrega.value;
+            const endereco = elements.modalEndereco ? elements.modalEndereco.value : '';
+            const formaPagamento = elements.modalPagamento.value;
+            const itemId = Number(elements.modalServico.value);
+            const itemObj = state.menu.find(m => m.id === itemId) || { nome: 'Pedido Balcão', preco: 22.00 };
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cliente,
+                        telefone,
+                        itens: [{ nome: itemObj.nome, preco: itemObj.preco, qtd: 1 }],
+                        tipoEntrega,
+                        enderecoEntrega: endereco,
+                        formaPagamento
+                    })
+                });
+
+                if (res.ok) {
+                    showToast('Pedido lançado com sucesso na cozinha!', 'success');
+                    elements.modalAgendamento.classList.add('hidden');
+                    elements.formNovoAgendamento.reset();
+                    fetchOrders();
+                } else {
+                    showToast('Erro ao lançar pedido.', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão.', 'error');
+            }
+        });
+    }
+
+    if (elements.btnRestartBot) {
+        elements.btnRestartBot.addEventListener('click', async () => {
+            await fetch('/api/bot/restart', { method: 'POST' });
+            showToast('Reiniciando WhatsApp Web...', 'info');
+        });
+    }
+
+    if (elements.btnLogoutBot) {
+        elements.btnLogoutBot.addEventListener('click', async () => {
+            await fetch('/api/bot/logout', { method: 'POST' });
+            showToast('Sessão desconectada.', 'info');
+            fetchStatus();
+        });
+    }
+
+    if (elements.btnManualRefreshQr) {
+        elements.btnManualRefreshQr.addEventListener('click', () => {
+            fetchStatus();
+            showToast('Atualizando status do QR Code...', 'info');
+        });
+    }
+
+    if (elements.btnRefreshAll) {
+        elements.btnRefreshAll.addEventListener('click', () => {
+            refreshData();
+            showToast('Dados atualizados!', 'success');
+        });
+    }
+
+    // Inicialização
+    refreshData();
+    setInterval(fetchOrders, 15000);
 });

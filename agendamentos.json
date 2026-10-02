@@ -1,13 +1,21 @@
 {
   "config": {
-    "nomeSalao": "Barbearia do Jonatan",
+    "nomeRestaurante": "Restaurante Bom Sabor",
+    "nomeSalao": "Restaurante Bom Sabor",
+    "slogan": "O melhor sabor da cidade no almoço e no jantar!",
     "numeroDono": "5515974062762@c.us",
     "chavePix": "15974062762",
-    "endereco": "Rua Principal, 123 - Centro",
+    "endereco": "Rua das Delícias, 123 - Centro",
+    "taxaEntregaPadrao": 5,
+    "tempoEstimadoMin": 30,
+    "tempoEstimadoMax": 50,
+    "horarioAlmoco": "11:00 às 15:00",
+    "horarioJantar": "18:00 às 23:30",
     "fechadoHoje": false,
-    "motivoFechado": "Folga da equipe",
+    "motivoFechado": "Descanso semanal da equipe",
     "dataFechadaManual": null,
     "diasSemana": {
+      "0": "Domingo",
       "1": "Segunda",
       "2": "Terça",
       "3": "Quarta",
@@ -15,101 +23,293 @@
       "5": "Sexta",
       "6": "Sábado"
     },
-    "horariosBase": [
-      "09:00",
-      "10:00",
-      "11:00",
-      "13:00",
-      "14:00",
-      "15:00",
-      "16:00",
-      "17:00",
-      "18:00",
-      "19:00",
-      "20:00",
-      "21:00"
-    ],
-    "servicos": [
+    "cardapio": [
+      {
+        "id": 1,
+        "categoria": "marmitex",
+        "nome": "Marmitex P (Pequena)",
+        "descricao": "Arroz branco, feijão caseiro, 1 opção de carne e guarnição do dia",
+        "preco": 18,
+        "turno": "dia",
+        "icone": "🍱",
+        "ativo": true
+      },
+      {
+        "id": 2,
+        "categoria": "marmitex",
+        "nome": "Marmitex M (Média - Mais Vendida)",
+        "descricao": "Arroz branco, feijão fresquinho, carne generosa, farofa e guarnições",
+        "preco": 22,
+        "turno": "dia",
+        "icone": "🍱",
+        "ativo": true
+      },
+      {
+        "id": 3,
+        "categoria": "marmitex",
+        "nome": "Marmitex G (Grande)",
+        "descricao": "Porção reforçada: Arroz, feijão, 2 carnes à sua escolha, salada e acompanhamentos",
+        "preco": 26,
+        "turno": "dia",
+        "icone": "🍛",
+        "ativo": true
+      },
+      {
+        "id": 4,
+        "categoria": "marmitex",
+        "nome": "Marmitex Executiva Especial",
+        "descricao": "Bife de Picanha na chapa ou Filé Parmegiana com fritas crocantes e salada",
+        "preco": 32,
+        "turno": "dia",
+        "icone": "🥩",
+        "ativo": true
+      },
+      {
+        "id": 5,
+        "categoria": "marmitex",
+        "nome": "Marmitex Fit & Saudável",
+        "descricao": "Arroz integral, peito de frango grelhado suculento e mix de legumes cozidos no vapor",
+        "preco": 24,
+        "turno": "dia",
+        "icone": "🥗",
+        "ativo": true
+      },
+      {
+        "id": 6,
+        "categoria": "marmitex",
+        "nome": "Marmitex Feijoada Completa (Especial)",
+        "descricao": "Feijoada tradicional com carnes selecionadas, couve refogada, farofa e torresmo",
+        "preco": 28,
+        "turno": "dia",
+        "icone": "🍲",
+        "ativo": true
+      },
+      {
+        "id": 7,
+        "categoria": "pizza",
+        "nome": "Pizza Calabresa Especial",
+        "descricao": "Molho artesanal, mussarela, calabresa fatiada crocante, cebola e azeitonas pretas",
+        "preco": 42,
+        "turno": "noite",
+        "icone": "🍕",
+        "ativo": true
+      },
+      {
+        "id": 8,
+        "categoria": "pizza",
+        "nome": "Pizza Mussarela Tradicional",
+        "descricao": "Molho de tomate especial, camada farta de mussarela derretida, rodelas de tomate e orégano",
+        "preco": 40,
+        "turno": "noite",
+        "icone": "🧀",
+        "ativo": true
+      },
+      {
+        "id": 9,
+        "categoria": "pizza",
+        "nome": "Pizza Frango com Catupiry",
+        "descricao": "Frango desfiado temperado com ervas finas, legítimo Catupiry cremoso e milho",
+        "preco": 48,
+        "turno": "noite",
+        "icone": "🍗",
+        "ativo": true
+      },
+      {
+        "id": 10,
+        "categoria": "pizza",
+        "nome": "Pizza Portuguesa Completa",
+        "descricao": "Mussarela, presunto selecionado, ovos cozidos, ervilhas, cebola, palmito e azeitonas",
+        "preco": 46,
+        "turno": "noite",
+        "icone": "🍕",
+        "ativo": true
+      },
+      {
+        "id": 11,
+        "categoria": "pizza",
+        "nome": "Pizza Quatro Queijos Nobres",
+        "descricao": "Mussarela, provolone defumado, parmesão ralado e requeijão cremoso",
+        "preco": 52,
+        "turno": "noite",
+        "icone": "🧀",
+        "ativo": true
+      },
+      {
+        "id": 12,
+        "categoria": "pizza",
+        "nome": "Pizza Margherita da Casa",
+        "descricao": "Mussarela, fatias de tomate fresco, folhas de manjericão aromático e azeite extravirgem",
+        "preco": 46,
+        "turno": "noite",
+        "icone": "🌿",
+        "ativo": true
+      },
+      {
+        "id": 13,
+        "categoria": "pizza",
+        "nome": "Pizza Doce Brigadeiro com Morangos",
+        "descricao": "Chocolate ao leite cremoso, granulado gourmet e fatias de morangos frescos",
+        "preco": 42,
+        "turno": "noite",
+        "icone": "🍫",
+        "ativo": true
+      },
+      {
+        "id": 14,
+        "categoria": "pizza",
+        "nome": "Pizza Doce Banana com Canela",
+        "descricao": "Fatias de banana caramelizadas, mussarela suave, leite condensado e canela em pó",
+        "preco": 38,
+        "turno": "noite",
+        "icone": "🍌",
+        "ativo": true
+      },
+      {
+        "id": 15,
+        "categoria": "bebida",
+        "nome": "Coca-Cola 2 Litros (Gelada)",
+        "descricao": "Refrigerante garrafa 2L pet bem gelada",
+        "preco": 14,
+        "turno": "todos",
+        "icone": "🥤",
+        "ativo": true
+      },
       {
         "id": 16,
-        "nome": "Corte Tradicional / Social",
-        "preco": 35,
-        "duracao": "40 min",
-        "icone": "✂️"
+        "categoria": "bebida",
+        "nome": "Coca-Cola Lata 350ml",
+        "descricao": "Lata 350ml geladinha",
+        "preco": 6,
+        "turno": "todos",
+        "icone": "🥤",
+        "ativo": true
       },
       {
         "id": 17,
-        "nome": "Degradê / Fade / Navalhado",
-        "preco": 40,
-        "duracao": "45 min",
-        "icone": "💈"
+        "categoria": "bebida",
+        "nome": "Guaraná Antarctica 2 Litros",
+        "descricao": "Refrigerante 2L pet bem gelado",
+        "preco": 12,
+        "turno": "todos",
+        "icone": "🥤",
+        "ativo": true
       },
       {
         "id": 18,
-        "nome": "Barba Terapia Completa (Toalha Quente)",
-        "preco": 30,
-        "duracao": "35 min",
-        "icone": "🧔"
+        "categoria": "bebida",
+        "nome": "Suco Natural da Fruta 500ml",
+        "descricao": "Sabores: Laranja, Maracujá ou Limonada Suíça",
+        "preco": 8,
+        "turno": "todos",
+        "icone": "🍹",
+        "ativo": true
       },
       {
         "id": 19,
-        "nome": "Combo Cabelo + Barba VIP",
-        "preco": 60,
-        "duracao": "60 min",
-        "icone": "👑"
+        "categoria": "bebida",
+        "nome": "Água Mineral 500ml",
+        "descricao": "Sem gás ou com gás",
+        "preco": 4,
+        "turno": "todos",
+        "icone": "💧",
+        "ativo": true
       },
       {
         "id": 20,
-        "nome": "Sobrancelha / Acabamento",
-        "preco": 15,
-        "duracao": "15 min",
-        "icone": "✨"
+        "categoria": "extra",
+        "nome": "Porção de Batata Frita Crocante",
+        "descricao": "Porção grande de batatas fritas sequinhas e crocantes com cheddar e bacon opcional",
+        "preco": 22,
+        "turno": "todos",
+        "icone": "🍟",
+        "ativo": true
       }
+    ],
+    "opcoesCarnes": [
+      "🥩 Bife Bovino Acebolado",
+      "🍗 Peito de Frango Grelhado",
+      "🥓 Bisteca Suína na Brasa",
+      "🧀 Filé de Frango à Parmegiana",
+      "🐟 Filé de Peixe Empanado",
+      "🍳 Omelete com Queijo e Tomate"
     ]
   },
-  "agendamentos": [
+  "pedidos": [
     {
-      "id": "ag_1790882501713_flm34",
-      "cliente": "blessedboxhome",
-      "telefone": "24086847692875@lid",
+      "id": "ped_demo_01",
+      "codigo": "#PED-1024",
+      "cliente": "Marcos Andrade",
+      "telefone": "5515999991111@c.us",
       "data": "2026-10-01",
-      "horario": "17:00",
-      "servico": "Corte Tradicional / Social",
-      "preco": 35,
-      "status": "cancelado",
+      "horario": "12:15",
+      "itens": [
+        {
+          "id": 2,
+          "nome": "Marmitex M (Média)",
+          "qtd": 2,
+          "preco": 22,
+          "total": 44,
+          "observacao": "Carne: Bife Bovino Acebolado"
+        },
+        {
+          "id": 16,
+          "nome": "Coca-Cola Lata 350ml",
+          "qtd": 2,
+          "preco": 6,
+          "total": 12
+        }
+      ],
+      "servico": "2x Marmitex M + 2x Coca-Cola Lata",
+      "subtotal": 56,
+      "taxaEntrega": 5,
+      "total": 61,
+      "preco": 61,
+      "tipoEntrega": "delivery",
+      "enderecoEntrega": "Av. Brasil, 450 - Centro (Apto 302)",
+      "formaPagamento": "PIX",
+      "status": "em_preparo",
       "origem": "whatsapp",
-      "criadoEm": "2026-10-01T19:21:41.713+00:00",
-      "canceladoEm": "2026-10-01T19:23:19.12+00:00",
-      "concluidoEm": null
+      "tempoEstimado": "35 a 50 min",
+      "criadoEm": "2026-10-01T15:15:00.000Z"
     },
     {
-      "id": "ag_1790882614096_qbp15",
-      "cliente": "blessedboxhome",
-      "telefone": "24086847692875@lid",
+      "id": "ped_demo_02",
+      "codigo": "#PED-1025",
+      "cliente": "Juliana Santos",
+      "telefone": "5515988882222@c.us",
       "data": "2026-10-01",
-      "horario": "17:00",
-      "servico": "Corte Tradicional / Social",
-      "preco": 35,
-      "status": "confirmado",
+      "horario": "19:30",
+      "itens": [
+        {
+          "id": 7,
+          "nome": "Pizza Calabresa Especial",
+          "qtd": 1,
+          "preco": 42,
+          "total": 42,
+          "observacao": "Borda de Catupiry"
+        },
+        {
+          "id": 15,
+          "nome": "Coca-Cola 2 Litros (Gelada)",
+          "qtd": 1,
+          "preco": 14,
+          "total": 14
+        }
+      ],
+      "servico": "1x Pizza Calabresa + 1x Coca-Cola 2L",
+      "subtotal": 56,
+      "taxaEntrega": 5,
+      "total": 61,
+      "preco": 61,
+      "tipoEntrega": "delivery",
+      "enderecoEntrega": "Rua das Palmeiras, 88 - Bairro Jardim",
+      "formaPagamento": "Cartão (Maquininha)",
+      "status": "pendente",
       "origem": "whatsapp",
-      "criadoEm": "2026-10-01T19:23:34.096+00:00",
-      "canceladoEm": null,
-      "concluidoEm": null
-    },
-    {
-      "id": "ag_1790770159044_6j2os",
-      "cliente": "Jonatan",
-      "telefone": "97908191973567@lid",
-      "data": "2026-09-30",
-      "horario": "10:00",
-      "servico": "Combo Cabelo + Barba",
-      "preco": 60,
-      "status": "cancelado",
-      "origem": "whatsapp",
-      "criadoEm": "2026-09-30T12:09:19.044+00:00",
-      "canceladoEm": "2026-10-01T19:25:42.814+00:00",
-      "concluidoEm": null
+      "tempoEstimado": "35 a 50 min",
+      "criadoEm": "2026-10-01T19:30:00.000Z"
     }
   ],
+  "agendamentos": [],
   "conversa": {}
 }

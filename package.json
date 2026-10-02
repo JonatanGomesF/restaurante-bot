@@ -1,7 +1,7 @@
 {
-  "name": "botsalaorev",
+  "name": "restaurante-bot",
   "version": "1.0.0",
-  "description": "Bot de agendamento para salão/barbearia via WhatsApp com Dashboard Web e Prevenção de Conflitos",
+  "description": "Bot de pedidos e delivery para Restaurante Bom Sabor via WhatsApp (Marmitex de dia e Pizzas de noite) com Painel Web em Tempo Real",
   "main": "chatbot.js",
   "bin": "chatbot.js",
   "scripts": {

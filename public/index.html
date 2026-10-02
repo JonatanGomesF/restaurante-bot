@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbearia Bot &mdash; Painel de Agendamentos & WhatsApp Hub</title>
-    <meta name="description" content="Sistema inteligente de agendamentos para salão e barbearia via WhatsApp com sincronização de QR Code em tempo real e prevenção ativa de colisões.">
+    <title>Restaurante Bom Sabor &mdash; Marmitex & Pizzaria WhatsApp Hub</title>
+    <meta name="description" content="Sistema inteligente de pedidos e delivery para Restaurante Bom Sabor via WhatsApp. Marmitex de dia e Pizzas à noite com gestão em tempo real.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <!-- Background glow ambient effects -->
+    <!-- Background ambient glow effects -->
     <div class="ambient-glow glow-1"></div>
     <div class="ambient-glow glow-2"></div>
     <div class="ambient-glow glow-3"></div>
@@ -29,10 +29,10 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="brand-logo">
-                    <div class="logo-icon">💈</div>
+                    <div class="logo-icon">🍽️</div>
                     <div class="brand-info">
-                        <h2 id="sidebar-salon-name">Barbearia do Mika</h2>
-                        <span class="badge-pro">WhatsApp Bot PRO</span>
+                        <h2 id="sidebar-salon-name">Restaurante Bom Sabor</h2>
+                        <span class="badge-pro">Delivery & WhatsApp PRO</span>
                     </div>
                 </div>
             </div>
@@ -53,13 +53,13 @@
                     <span class="nav-badge" id="qr-nav-badge">QR</span>
                 </button>
                 <button class="nav-btn" data-tab="tab-calendar" id="nav-calendar">
-                    <i data-lucide="calendar"></i>
-                    <span>Agenda & Horários</span>
+                    <i data-lucide="chef-hat"></i>
+                    <span>Cozinha & Pedidos Ao Vivo</span>
                     <span class="nav-badge count" id="today-count-badge">0</span>
                 </button>
                 <button class="nav-btn" data-tab="tab-appointments" id="nav-appointments">
-                    <i data-lucide="list-checks"></i>
-                    <span>Todos Agendamentos</span>
+                    <i data-lucide="receipt"></i>
+                    <span>Histórico de Pedidos</span>
                 </button>
                 <button class="nav-btn" data-tab="tab-simulator" id="nav-simulator">
                     <i data-lucide="message-square"></i>
@@ -67,17 +67,17 @@
                     <span class="nav-badge live">LIVE</span>
                 </button>
                 <button class="nav-btn" data-tab="tab-settings" id="nav-settings">
-                    <i data-lucide="sliders"></i>
-                    <span>Serviços & Config</span>
+                    <i data-lucide="utensils"></i>
+                    <span>Cardápio & Restaurante</span>
                 </button>
             </nav>
 
             <div class="sidebar-footer">
                 <div class="anti-conflict-badge">
-                    <i data-lucide="shield-check"></i>
+                    <i data-lucide="truck"></i>
                     <div>
-                        <strong>Anti-Conflito Ativo</strong>
-                        <small>Zero sobreposição de horários</small>
+                        <strong>Marmitex & Pizzaria</strong>
+                        <small id="footer-shift-status">Turno Almoço & Jantar</small>
                     </div>
                 </div>
             </div>
@@ -89,7 +89,7 @@
             <header class="topbar">
                 <div class="topbar-title">
                     <h1 id="page-title">Conexão WhatsApp & QR Code</h1>
-                    <p id="page-subtitle">Escaneie o código para autenticar o bot de atendimento e agendamento</p>
+                    <p id="page-subtitle">Escaneie o código para ativar o bot de pedidos automáticos do Restaurante Bom Sabor</p>
                 </div>
 
                 <div class="topbar-actions">
@@ -99,7 +99,7 @@
                     </button>
                     <button class="btn btn-primary" id="btn-modal-novo-agendamento">
                         <i data-lucide="plus"></i>
-                        <span>Novo Agendamento</span>
+                        <span>Novo Pedido Balcão</span>
                     </button>
                 </div>
             </header>
@@ -108,19 +108,19 @@
             <section class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-icon gold">
-                        <i data-lucide="calendar-check"></i>
+                        <i data-lucide="shopping-bag"></i>
                     </div>
                     <div class="metric-data">
-                        <span class="metric-label">Agendamentos Hoje</span>
+                        <span class="metric-label">Pedidos Hoje</span>
                         <h3 class="metric-value" id="stat-hoje">0</h3>
                     </div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-icon blue">
-                        <i data-lucide="clock"></i>
+                        <i data-lucide="hourglass"></i>
                     </div>
                     <div class="metric-data">
-                        <span class="metric-label">Vagas Livres Hoje</span>
+                        <span class="metric-label">Em Preparo / Pendentes</span>
                         <h3 class="metric-value" id="stat-livres">0</h3>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
                         <i data-lucide="check-circle-2"></i>
                     </div>
                     <div class="metric-data">
-                        <span class="metric-label">Confirmados Total</span>
+                        <span class="metric-label">Pedidos Entregues</span>
                         <h3 class="metric-value" id="stat-total">0</h3>
                     </div>
                 </div>
@@ -138,7 +138,7 @@
                         <i data-lucide="dollar-sign"></i>
                     </div>
                     <div class="metric-data">
-                        <span class="metric-label">Faturamento Estimado</span>
+                        <span class="metric-label">Faturamento Hoje</span>
                         <h3 class="metric-value" id="stat-faturamento">R$ 0,00</h3>
                     </div>
                 </div>
@@ -152,8 +152,8 @@
                         <div class="card-header">
                             <div class="header-icon"><i data-lucide="smartphone"></i></div>
                             <div>
-                                <h2>Conexão em Tempo Real</h2>
-                                <p>Sincronização automática com seu WhatsApp</p>
+                                <h2>Conexão WhatsApp em Tempo Real</h2>
+                                <p>Sincronização automática para atendimento e pedidos de delivery</p>
                             </div>
                             <div class="connection-status-pill" id="qr-status-pill">
                                 <span class="pill-dot"></span>
@@ -180,15 +180,15 @@
                         <!-- QR State: CONNECTED -->
                         <div class="qr-connected-card hidden" id="qr-container-connected">
                             <div class="connected-badge-icon">
-                                <i data-lucide="shield-check"></i>
+                                <i data-lucide="chef-hat"></i>
                             </div>
-                            <h3>WhatsApp Conectado com Sucesso!</h3>
-                            <p>O bot está ativo e respondendo aos clientes automaticamente.</p>
+                            <h3>WhatsApp do Restaurante Conectado!</h3>
+                            <p>O bot está ativo recebendo pedidos de Marmitex e Pizza automaticamente.</p>
 
                             <div class="connected-details-box">
                                 <div class="detail-item">
                                     <span class="label">Perfil Conectado:</span>
-                                    <strong id="user-pushname">Barbearia</strong>
+                                    <strong id="user-pushname">Restaurante Bom Sabor</strong>
                                 </div>
                                 <div class="detail-item">
                                     <span class="label">Número do WhatsApp:</span>
@@ -199,8 +199,8 @@
                                     <strong id="user-platform">WhatsApp Web</strong>
                                 </div>
                                 <div class="detail-item">
-                                    <span class="label">Status do Atendimento:</span>
-                                    <span class="badge-status online">🟢 Online & Respondendo</span>
+                                    <span class="label">Status do Bot:</span>
+                                    <span class="badge-status online">🟢 Online & Aceitando Pedidos</span>
                                 </div>
                             </div>
 
@@ -225,34 +225,34 @@
                     <!-- Step-by-Step Tutorial & Safety Info -->
                     <div class="qrcode-side-panel">
                         <div class="glass-card instructions-card">
-                            <h3><i data-lucide="help-circle"></i> Como Conectar em 4 Passos</h3>
+                            <h3><i data-lucide="help-circle"></i> Conecte seu WhatsApp em 4 Passos</h3>
                             <ol class="step-list">
                                 <li>
                                     <div class="step-num">1</div>
                                     <div class="step-desc">
-                                        <strong>Abra o WhatsApp</strong>
-                                        <p>Abra o app do WhatsApp no seu smartphone.</p>
+                                        <strong>Abra o WhatsApp no Celular</strong>
+                                        <p>Abra o WhatsApp no smartphone do restaurante.</p>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="step-num">2</div>
                                     <div class="step-desc">
-                                        <strong>Acesse Aparelhos Conectados</strong>
-                                        <p>No Android: Menu (⋮) &gt; Aparelhos conectados.<br>No iPhone: Ajustes (⚙️) &gt; Aparelhos conectados.</p>
+                                        <strong>Aparelhos Conectados</strong>
+                                        <p>Acesse Menu (⋮) ou Configurações &gt; Aparelhos conectados.</p>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="step-num">3</div>
                                     <div class="step-desc">
                                         <strong>Conectar um Aparelho</strong>
-                                        <p>Toque no botão "Conectar um aparelho" e confirme biometria.</p>
+                                        <p>Toque no botão "Conectar um aparelho".</p>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="step-num">4</div>
                                     <div class="step-desc">
                                         <strong>Aponte a Câmera</strong>
-                                        <p>Aponte a câmera para o QR Code ao lado para sincronizar.</p>
+                                        <p>Escaneie o QR Code ao lado para iniciar as vendas automáticas!</p>
                                     </div>
                                 </li>
                             </ol>
@@ -260,36 +260,34 @@
 
                         <div class="glass-card collision-card">
                             <div class="shield-header">
-                                <i data-lucide="lock"></i>
-                                <h4>Sistema Anti-Colisão em Tempo Real</h4>
+                                <i data-lucide="zap"></i>
+                                <h4>Cardápio Inteligente Dia & Noite</h4>
                             </div>
-                            <p>Quando um cliente escolhe um horário pelo WhatsApp (ex: <em>Segunda às 10h</em>), o sistema <strong>bloqueia imediatamente</strong> o horário no banco de dados.</p>
-                            <p class="highlight-text">🛡️ Se outro cliente tentar selecionar o mesmo horário ao mesmo tempo, o bot avisa instantaneamente e oferece apenas os horários livres restantes.</p>
+                            <p>☀️ <strong>De Dia (Almoço):</strong> O bot oferece marmitex com opções de carnes e guarnições fresquinhas.</p>
+                            <p>🌙 <strong>À Noite (Jantar):</strong> O bot foca em pizzas artesanais de forno e refrigerantes gelados.</p>
+                            <p class="highlight-text">🛵 O cliente monta o pedido no WhatsApp, escolhe Delivery ou Retirada, informa a forma de pagamento e a comanda cai direto aqui no painel!</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- TAB 2: AGENDA & CALENDÁRIO INTERATIVO -->
+            <!-- TAB 2: COZINHA & PEDIDOS AO VIVO (KANBAN / FEED) -->
             <section class="tab-content" id="tab-calendar">
                 <div class="calendar-header-bar">
                     <div class="date-navigator">
                         <button class="btn btn-secondary btn-icon" id="btn-prev-day"><i data-lucide="chevron-left"></i></button>
                         <div class="current-date-display">
-                            <h2 id="calendar-selected-date-label">Hoje, Segunda-feira</h2>
-                            <span id="calendar-selected-date-sub">05 de Outubro de 2026</span>
+                            <h2 id="calendar-selected-date-label">Hoje, Pedidos ao Vivo</h2>
+                            <span id="calendar-selected-date-sub">Restaurante Bom Sabor</span>
                         </div>
                         <button class="btn btn-secondary btn-icon" id="btn-next-day"><i data-lucide="chevron-right"></i></button>
                     </div>
 
-                    <div class="quick-days-pills" id="quick-days-container">
-                        <!-- Dynamic week day pills rendered via JS -->
-                    </div>
-
                     <div class="calendar-legend">
-                        <span class="legend-item"><span class="dot available"></span> Livre</span>
-                        <span class="legend-item"><span class="dot occupied"></span> Agendado (WhatsApp / Balcão)</span>
-                        <span class="legend-item"><span class="dot locked"></span> Conflito Bloqueado</span>
+                        <span class="legend-item"><span class="dot available"></span> Pendente</span>
+                        <span class="legend-item"><span class="dot occupied"></span> Em Preparo</span>
+                        <span class="legend-item"><span class="dot delivery-dot"></span> Saiu para Entrega</span>
+                        <span class="legend-item"><span class="dot locked"></span> Entregue / Concluído</span>
                     </div>
                 </div>
 
@@ -298,32 +296,34 @@
                     <div class="closed-banner-content">
                         <div class="closed-banner-icon"><i data-lucide="alert-octagon"></i></div>
                         <div>
-                            <h4>🛑 SALÃO FECHADO HOJE</h4>
-                            <p id="calendar-closed-reason">Atendimento presencial pausado pelo administrador para a data de hoje. Clientes no WhatsApp estão sendo orientados a agendar para os próximos dias.</p>
+                            <h4>🛑 RESTAURANTE FECHADO HOJE</h4>
+                            <p id="calendar-closed-reason">Atendimento pausado pelo administrador. Clientes no WhatsApp estão sendo orientados sobre o recesso.</p>
                         </div>
                     </div>
-                    <button class="btn btn-secondary btn-sm" id="btn-quick-reopen">Reabrir Salão</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-quick-reopen">Reabrir Restaurante</button>
                 </div>
 
-                <!-- Slots Grid (09:00 - 21:00) -->
-                <div class="slots-grid-container" id="slots-grid-container">
-                    <!-- Dynamic slots cards -->
+                <!-- Live Orders Container -->
+                <div class="orders-live-container" id="slots-grid-container">
+                    <!-- Dynamic live orders cards rendered via JS -->
                 </div>
             </section>
 
-            <!-- TAB 3: TODOS OS AGENDAMENTOS -->
+            <!-- TAB 3: HISTÓRICO DE PEDIDOS -->
             <section class="tab-content" id="tab-appointments">
                 <div class="glass-card table-card">
                     <div class="table-toolbar">
                         <div class="search-box">
                             <i data-lucide="search"></i>
-                            <input type="text" id="search-appointments" placeholder="Buscar por cliente, telefone ou serviço...">
+                            <input type="text" id="search-appointments" placeholder="Buscar por cliente, telefone, código (#PED-1234) ou itens...">
                         </div>
                         <div class="filter-group">
                             <select id="filter-status" class="form-select">
                                 <option value="">Todos os Status</option>
-                                <option value="confirmado">Confirmados</option>
-                                <option value="concluido">Concluídos</option>
+                                <option value="pendente">Pendentes</option>
+                                <option value="em_preparo">Em Preparo</option>
+                                <option value="saiu_entrega">Saiu para Entrega</option>
+                                <option value="concluido">Entregues / Concluídos</option>
                                 <option value="cancelado">Cancelados</option>
                             </select>
                             <input type="date" id="filter-date" class="form-input">
@@ -334,12 +334,13 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Horário / Data</th>
+                                    <th>Cód / Hora</th>
                                     <th>Cliente</th>
-                                    <th>WhatsApp / Contato</th>
-                                    <th>Serviço</th>
-                                    <th>Valor</th>
-                                    <th>Origem</th>
+                                    <th>WhatsApp</th>
+                                    <th>Itens / Pedido</th>
+                                    <th>Tipo / Endereço</th>
+                                    <th>Total</th>
+                                    <th>Pagamento</th>
                                     <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
@@ -352,7 +353,7 @@
                 </div>
             </section>
 
-            <!-- TAB 4: SIMULADOR & LIVE LOGS -->
+            <!-- TAB 4: SIMULADOR DE WHATSAPP & LIVE LOGS -->
             <section class="tab-content" id="tab-simulator">
                 <div class="simulator-layout">
                     <!-- Phone simulator frame -->
@@ -360,28 +361,30 @@
                         <div class="phone-notch"></div>
                         <div class="phone-screen">
                             <div class="whatsapp-chat-header">
-                                <div class="chat-avatar">💈</div>
+                                <div class="chat-avatar">🍽️</div>
                                 <div class="chat-info">
-                                    <strong id="sim-barber-title">Barbearia do Mika</strong>
-                                    <span class="chat-status">online (Bot Ativo)</span>
+                                    <strong id="sim-barber-title">Restaurante Bom Sabor</strong>
+                                    <span class="chat-status">online (Atendente Virtual)</span>
                                 </div>
                             </div>
                             <div class="whatsapp-messages-body" id="sim-messages-body">
                                 <div class="chat-bubble incoming">
                                     <div class="bubble-text">
-                                        💈 <strong>BEM-VINDO À BARBEARIA DO MIKA</strong><br><br>
-                                        Olá! Como podemos cuidar do seu visual hoje?<br><br>
-                                        1️⃣ <strong>Agendar Horário</strong> 📅<br>
-                                        2️⃣ <strong>Ver Meus Agendamentos / Cancelar</strong> 📋<br>
-                                        3️⃣ <strong>Tabela de Serviços & Preços</strong> 💈<br>
-                                        4️⃣ <strong>Endereço & Horários</strong> 📍<br><br>
-                                        <em>Envie 1 para agendar!</em>
+                                        🍽️ <strong>BEM-VINDO AO RESTAURANTE BOM SABOR</strong><br><br>
+                                        Olá! O que você gostaria de saborear hoje?<br><br>
+                                        ⏰ <em>Almoço: Marmitex fresquinhas (11h às 15h)</em><br>
+                                        🍕 <em>Noite: Pizzas artesanais (18h às 23h30)</em><br><br>
+                                        1️⃣ <strong>Fazer Pedido</strong> 🛒<br>
+                                        2️⃣ <strong>Ver Cardápio Completo</strong> 📋<br>
+                                        3️⃣ <strong>Acompanhar Meu Pedido</strong> 🛵<br>
+                                        4️⃣ <strong>Horários, Endereço & Pagamento</strong> 📍<br><br>
+                                        <em>Envie 1 para pedir agora!</em>
                                     </div>
-                                    <span class="bubble-time">10:00</span>
+                                    <span class="bubble-time">12:00</span>
                                 </div>
                             </div>
                             <div class="whatsapp-input-bar">
-                                <input type="text" id="sim-input" placeholder="Digite uma mensagem (ex: 1, 2, cancelar)..." autocomplete="off">
+                                <input type="text" id="sim-input" placeholder="Digite uma mensagem (ex: 1, pedir marmita, pizza)..." autocomplete="off">
                                 <button id="btn-sim-send"><i data-lucide="send"></i></button>
                             </div>
                         </div>
@@ -393,21 +396,21 @@
                             <div class="header-icon"><i data-lucide="terminal"></i></div>
                             <div>
                                 <h2>Monitor de Eventos em Tempo Real</h2>
-                                <p>Registro instantâneo de mensagens recebidas, respostas e bloqueios</p>
+                                <p>Registro instantâneo de pedidos, mensagens recebidas e notificações</p>
                             </div>
                             <button class="btn btn-secondary btn-sm" id="btn-clear-logs">Limpar</button>
                         </div>
                         <div class="logs-console" id="logs-console">
                             <div class="log-entry system">
                                 <span class="log-time">[Sistema]</span>
-                                <span class="log-text">Monitor de agendamentos e proteção anti-conflito inicializado.</span>
+                                <span class="log-text">Central de pedidos Restaurante Bom Sabor iniciada com sucesso.</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- TAB 5: CONFIGURAÇÕES & SERVIÇOS -->
+            <!-- TAB 5: CARDÁPIO & CONFIGURAÇÕES -->
             <section class="tab-content" id="tab-settings">
                 <div class="settings-grid">
                     <!-- CARD 1: CONTROLE DE FUNCIONAMENTO (HOJE ESTAMOS FECHADOS) -->
@@ -415,124 +418,75 @@
                         <div class="card-header">
                             <div class="header-icon" id="icon-status-funcionamento"><i data-lucide="power"></i></div>
                             <div>
-                                <h2>Status de Funcionamento Hoje</h2>
-                                <p>Controle emergencial de abertura e fechamento do salão</p>
+                                <h2>Status do Restaurante Hoje</h2>
+                                <p>Controle emergencial de abertura e fechamento para delivery</p>
                             </div>
                             <div class="closed-status-pill open" id="badge-status-fechado">
                                 <span class="pill-dot"></span>
-                                <span class="pill-text" id="txt-badge-status-fechado">🟢 Salão Aberto Hoje</span>
+                                <span class="pill-text" id="txt-badge-status-fechado">🟢 Restaurante Aberto</span>
                             </div>
                         </div>
                         <div class="closed-control-body">
                             <p class="closed-desc">
-                                Ative o modo <strong>"Hoje Estamos Fechados"</strong> para suspender instantaneamente as vagas de hoje no bot do WhatsApp e no painel. O bot continuará aceitando agendamentos normalmente para os próximos dias!
+                                Ative o modo <strong>"Hoje Estamos Fechados"</strong> para suspender instantaneamente os pedidos no WhatsApp e no painel. O bot informará o motivo aos clientes educadamente!
                             </p>
 
                             <div class="form-group" style="margin-top: 14px;">
                                 <label for="cfg-motivo-fechado">Motivo / Aviso aos Clientes (Exibido no WhatsApp)</label>
-                                <input type="text" id="cfg-motivo-fechado" class="form-input" placeholder="Ex: Feriado municipal / Manutenção do espaço / Folga da equipe">
+                                <input type="text" id="cfg-motivo-fechado" class="form-input" placeholder="Ex: Descanso semanal da equipe / Feriado / Manutenção">
                             </div>
 
                             <div class="closed-action-row">
                                 <button type="button" class="btn btn-danger-solid" id="btn-toggle-fechado-hoje">
                                     <i data-lucide="alert-octagon"></i>
-                                    <span id="txt-btn-toggle-fechado">🛑 Ativar Modo: HOJE ESTAMOS FECHADOS</span>
+                                    <span id="txt-btn-toggle-fechado">🛑 Ativar Modo: RESTAURANTE FECHADO HOJE</span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- CARD 2: CONFIGURAÇÃO DE VAGAS & HORÁRIOS BASE -->
-                    <div class="glass-card">
-                        <div class="card-header">
-                            <div class="header-icon"><i data-lucide="clock"></i></div>
-                            <div>
-                                <h2>Horários de Atendimento & Vagas</h2>
-                                <p>Defina o número de vagas diárias e os horários disponíveis</p>
-                            </div>
-                            <span class="badge-vagas-count" id="vagas-count-badge">12 Vagas Diárias</span>
-                        </div>
-                        <div class="form-body">
-                            <!-- Presets rápidos -->
-                            <div class="slots-presets-row">
-                                <span class="preset-label">⚡ Predefinições Rápidas:</span>
-                                <div class="preset-btns">
-                                    <button type="button" class="btn btn-secondary btn-xs" id="preset-12-vagas">12 Vagas (09h-21h)</button>
-                                    <button type="button" class="btn btn-secondary btn-xs" id="preset-8-vagas">8 Vagas (09h-18h)</button>
-                                    <button type="button" class="btn btn-secondary btn-xs" id="preset-15-vagas">15 Vagas (08h-22h)</button>
-                                    <button type="button" class="btn btn-secondary btn-xs" id="preset-30min">Intervalo 30 min</button>
-                                </div>
-                            </div>
-
-                            <!-- Adicionar Novo Horário -->
-                            <div class="add-slot-row">
-                                <div class="form-group" style="margin: 0; flex: 1;">
-                                    <label for="input-new-time">Adicionar Novo Horário de Atendimento</label>
-                                    <div style="display: flex; gap: 8px;">
-                                        <input type="time" id="input-new-time" class="form-input" value="08:00" style="max-width: 160px;">
-                                        <button type="button" class="btn btn-secondary" id="btn-add-slot-time">
-                                            <i data-lucide="plus"></i> Adicionar Horário
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Grade de Chips de Horários / Vagas Editáveis -->
-                            <label style="margin-top: 16px; display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">
-                                Horários Ativos (<span id="slots-count-number">12</span> vagas configuradas):
-                            </label>
-                            <div class="slots-chips-grid" id="slots-chips-container">
-                                <!-- Dynamic time chips -->
-                            </div>
-
-                            <!-- Dias de Funcionamento -->
-                            <div class="working-days-box" style="margin-top: 18px;">
-                                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">
-                                    📅 Dias de Funcionamento na Semana:
-                                </label>
-                                <div class="working-days-checkboxes" id="working-days-container">
-                                    <label class="day-checkbox"><input type="checkbox" data-day="1" checked> Seg</label>
-                                    <label class="day-checkbox"><input type="checkbox" data-day="2" checked> Ter</label>
-                                    <label class="day-checkbox"><input type="checkbox" data-day="3" checked> Qua</label>
-                                    <label class="day-checkbox"><input type="checkbox" data-day="4" checked> Qui</label>
-                                    <label class="day-checkbox"><input type="checkbox" data-day="5" checked> Sex</label>
-                                    <label class="day-checkbox"><input type="checkbox" data-day="6" checked> Sáb</label>
-                                    <label class="day-checkbox"><input type="checkbox" data-day="0"> Dom</label>
-                                </div>
-                            </div>
-
-                            <button type="button" class="btn btn-primary" id="btn-save-slots" style="margin-top: 20px;">
-                                <i data-lucide="save"></i> Salvar Horários & Vagas Diárias
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- CARD 3: Informações da Barbearia -->
+                    <!-- CARD 2: Dados do Restaurante & Delivery -->
                     <div class="glass-card">
                         <div class="card-header">
                             <div class="header-icon"><i data-lucide="store"></i></div>
                             <div>
-                                <h2>Informações da Barbearia</h2>
-                                <p>Dados que o bot envia aos clientes</p>
+                                <h2>Dados do Restaurante</h2>
+                                <p>Informações comerciais enviadas aos clientes</p>
                             </div>
                         </div>
                         <form id="form-config-geral" class="form-body">
                             <div class="form-group">
-                                <label for="cfg-nome">Nome da Barbearia / Salão</label>
-                                <input type="text" id="cfg-nome" class="form-input" required>
+                                <label for="cfg-nome">Nome do Restaurante</label>
+                                <input type="text" id="cfg-nome" class="form-input" value="Restaurante Bom Sabor" required>
                             </div>
                             <div class="form-group">
-                                <label for="cfg-dono">WhatsApp do Dono / Barbeiro (com DDI e DDD)</label>
+                                <label for="cfg-dono">WhatsApp da Cozinha / Dono (com DDI e DDD)</label>
                                 <input type="text" id="cfg-dono" class="form-input" placeholder="5515974062762" required>
-                                <small>Receberá alertas instantâneos a cada novo agendamento e cancelamento.</small>
+                                <small>Receberá as comandas completas a cada novo pedido realizado no WhatsApp.</small>
                             </div>
                             <div class="form-group">
-                                <label for="cfg-endereco">Endereço Completo</label>
-                                <input type="text" id="cfg-endereco" class="form-input" placeholder="Rua Exemplo, 123 - Centro">
+                                <label for="cfg-endereco">Endereço Completo (Para Retirada)</label>
+                                <input type="text" id="cfg-endereco" class="form-input" placeholder="Rua das Delícias, 123 - Centro">
                             </div>
-                            <div class="form-group">
-                                <label for="cfg-pix">Chave PIX para Pagamento</label>
-                                <input type="text" id="cfg-pix" class="form-input" placeholder="Telefone / CPF / CNPJ / Aleatória">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="cfg-taxa">Taxa de Entrega Padrão (R$)</label>
+                                    <input type="number" step="0.50" id="cfg-taxa" class="form-input" value="5.00">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cfg-pix">Chave PIX do Restaurante</label>
+                                    <input type="text" id="cfg-pix" class="form-input" placeholder="Telefone / CPF / CNPJ / Aleatória">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="cfg-almoco">Horário do Almoço (Marmitex)</label>
+                                    <input type="text" id="cfg-almoco" class="form-input" value="11:00 às 15:00">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cfg-jantar">Horário da Noite (Pizzaria)</label>
+                                    <input type="text" id="cfg-jantar" class="form-input" value="18:00 às 23:30">
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-primary">
                                 <i data-lucide="save"></i> Salvar Informações
@@ -540,20 +494,26 @@
                         </form>
                     </div>
 
-                    <!-- CARD 4: Gestão de Serviços & Preços -->
-                    <div class="glass-card">
+                    <!-- CARD 3: Gestão do Cardápio (Marmitex, Pizzas e Bebidas) -->
+                    <div class="glass-card" style="grid-column: 1 / -1;">
                         <div class="card-header">
-                            <div class="header-icon"><i data-lucide="scissors"></i></div>
+                            <div class="header-icon"><i data-lucide="menu"></i></div>
                             <div>
-                                <h2>Serviços & Tabela de Preços</h2>
-                                <p>Serviços disponíveis para agendamento no bot</p>
+                                <h2>Gestão do Cardápio (Marmitex, Pizzas & Bebidas)</h2>
+                                <p>Itens disponíveis para pedidos imediatos no WhatsApp</p>
                             </div>
                         </div>
+                        <div class="menu-tabs-row" style="display: flex; gap: 10px; margin-bottom: 16px;">
+                            <button type="button" class="btn btn-secondary btn-sm active" id="btn-filter-marmitex">🍱 Marmitex (Dia)</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-filter-pizza">🍕 Pizzas (Noite)</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-filter-bebidas">🥤 Bebidas & Extras</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-filter-todos">📋 Todos os Itens</button>
+                        </div>
                         <div class="services-list" id="services-list-container">
-                            <!-- Dynamic services list -->
+                            <!-- Dynamic menu items rendered via JS -->
                         </div>
                         <button class="btn btn-secondary" id="btn-add-service" style="margin-top: 16px;">
-                            <i data-lucide="plus-circle"></i> Adicionar Novo Serviço
+                            <i data-lucide="plus-circle"></i> Adicionar Item ao Cardápio
                         </button>
                     </div>
                 </div>
@@ -561,17 +521,17 @@
         </main>
     </div>
 
-    <!-- MODAL: NOVO AGENDAMENTO MANUAL -->
+    <!-- MODAL: NOVO PEDIDO BALCÃO / MANUAL -->
     <div class="modal-overlay hidden" id="modal-agendamento">
         <div class="glass-card modal-box">
             <div class="modal-header">
-                <h3><i data-lucide="plus-circle"></i> Novo Agendamento</h3>
+                <h3><i data-lucide="plus-circle"></i> Lançar Pedido no Balcão</h3>
                 <button class="modal-close" id="btn-close-modal">&times;</button>
             </div>
             <form id="form-novo-agendamento" class="form-body">
                 <div class="form-group">
                     <label for="modal-cliente">Nome do Cliente</label>
-                    <input type="text" id="modal-cliente" class="form-input" placeholder="Ex: Roberto Silva" required>
+                    <input type="text" id="modal-cliente" class="form-input" placeholder="Ex: Carlos Oliveira" required>
                 </div>
                 <div class="form-group">
                     <label for="modal-telefone">Telefone / WhatsApp</label>
@@ -579,25 +539,34 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="modal-data">Data</label>
-                        <input type="date" id="modal-data" class="form-input" required>
+                        <label for="modal-tipo-entrega">Tipo</label>
+                        <select id="modal-tipo-entrega" class="form-select">
+                            <option value="retirada">🛍️ Retirada no Balcão</option>
+                            <option value="delivery">🛵 Delivery</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="modal-horario">Horário Disponível</label>
-                        <select id="modal-horario" class="form-select" required>
-                            <option value="">Selecione uma data primeiro</option>
+                        <label for="modal-pagamento">Forma de Pagamento</label>
+                        <select id="modal-pagamento" class="form-select">
+                            <option value="PIX">🔑 PIX</option>
+                            <option value="Cartão">💳 Cartão</option>
+                            <option value="Dinheiro">💵 Dinheiro</option>
                         </select>
                     </div>
                 </div>
+                <div class="form-group" id="modal-group-endereco" style="display: none;">
+                    <label for="modal-endereco">Endereço de Entrega</label>
+                    <input type="text" id="modal-endereco" class="form-input" placeholder="Rua, Número, Bairro">
+                </div>
                 <div class="form-group">
-                    <label for="modal-servico">Serviço</label>
+                    <label for="modal-servico">Item do Cardápio</label>
                     <select id="modal-servico" class="form-select" required>
                         <!-- Dynamic options -->
                     </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="btn-confirm-booking">Confirmar Agendamento</button>
+                    <button type="submit" class="btn btn-primary" id="btn-confirm-booking">Enviar para Cozinha</button>
                 </div>
             </form>
         </div>

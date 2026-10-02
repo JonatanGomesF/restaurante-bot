@@ -1,6 +1,8 @@
 {
+  "restauranteId": "restaurante_principal",
   "barbeariaId": "restaurante_principal",
   "githubRepo": "JonatanGomesF/restaurante-bot",
   "branch": "main",
-  "descricao": "Altere o 'barbeariaId' para cada cliente (ex: barbearia_mika, barbearia_lima). O 'githubRepo' sincroniza layouts e melhorias automaticamente."
+  "descricao": "Configurações do Restaurante Bom Sabor (Marmitex de dia e Pizza à noite)."
 }
+
