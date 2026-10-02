@@ -26,6 +26,33 @@ try {
     }
 } catch (e) {}
 
+const DEFAULT_CATEGORIAS = [
+    {
+        id: 'marmitex',
+        nome: 'Marmitex do Dia (Almoço)',
+        icone: '🍱',
+        turno: 'dia',
+        ordem: 1,
+        ativo: true
+    },
+    {
+        id: 'pizza',
+        nome: 'Pizzas Artesanais (Jantar & Noite)',
+        icone: '🍕',
+        turno: 'noite',
+        ordem: 2,
+        ativo: true
+    },
+    {
+        id: 'bebida',
+        nome: 'Bebidas & Extras',
+        icone: '🥤',
+        turno: 'todos',
+        ordem: 3,
+        ativo: true
+    }
+];
+
 const DEFAULT_CARDAPIO = [
     // --- MARMITEX (ALMOÇO / DIA) ---
     {
@@ -234,18 +261,68 @@ const DEFAULT_CARDAPIO = [
     }
 ];
 
-const OPCOES_CARNES_MARMITEX = [
-    '🥩 Bife Bovino Acebolado',
-    '🍗 Peito de Frango Grelhado',
-    '🥓 Bisteca Suína na Brasa',
-    '🧀 Filé de Frango à Parmegiana',
-    '🐟 Filé de Peixe Empanado',
-    '🍳 Omelete com Queijo e Tomate'
+const DEFAULT_OPCOES_CARNES = [
+    { id: 1, nome: '🥩 Bife Bovino Acebolado', ativo: true },
+    { id: 2, nome: '🍗 Peito de Frango Grelhado', ativo: true },
+    { id: 3, nome: '🥓 Bisteca Suína na Brasa', ativo: true },
+    { id: 4, nome: '🧀 Filé de Frango à Parmegiana', ativo: true },
+    { id: 5, nome: '🐟 Filé de Peixe Empanado', ativo: true },
+    { id: 6, nome: '🍳 Omelete com Queijo e Tomate', ativo: true }
 ];
+
+const DEFAULT_OPCOES_BORDAS = [
+    { id: 1, nome: 'Tradicional (Sem borda extra)', preco: 0.00, ativo: true },
+    { id: 2, nome: 'Borda de Catupiry Original', preco: 8.00, ativo: true },
+    { id: 3, nome: 'Borda de Cheddar Cremoso', preco: 8.00, ativo: true },
+    { id: 4, nome: 'Borda de Chocolate ao Leite', preco: 10.00, ativo: true }
+];
+
+// =====================================================================
+// TEMPLATES DE MENSAGENS DO BOT (100% CONFIGURÁVEIS PELO PAINEL)
+// =====================================================================
+const DEFAULT_MENSAGENS = {
+    menuPrincipal: `🍽️ *BEM-VINDO AO {restaurante}* 🍽️\n\nOlá, *{nome}*! O que você gostaria de saborear hoje?\n\n{avisoTurno}\n{avisoFechado}\n1️⃣ 🛒 *Fazer Pedido (Marmitex / Pizzas / Bebidas)*\n2️⃣ 📋 *Ver Cardápio Completo*\n3️⃣ 🛵 *Acompanhar Meu Pedido (Status)*\n4️⃣ 📍 *Horários, Endereço & Formas de Pagamento*\n5️⃣ ❌ *Cancelar Pedido*\n\n👉 _Digite o número da opção desejada (Ex: *1*):_`,
+
+    fechadoAviso: `🛑 *AVISO:* O restaurante está fechado hoje ({motivo}).`,
+
+    escolhaCategoria: `🛒 *FAZER PEDIDO — {restaurante}* 🍽️\n\nEscolha a categoria desejada:\n\n{listaCategorias}\n\n_Digite o número da categoria desejada (Ex: 1):_`,
+
+    escolhaItem: `{tituloCategoria}\n━━━━━━━━━━━━━━━━━━━━\n\n{listaItens}\n\n👉 *Digite o número da opção que deseja adicionar:* (Ex: 1)\n_Envie *MENU* para voltar ao início._`,
+
+    escolhaCarne: `🍱 Você escolheu: *{item}* ({preco})\n\n🥩 *Escolha a opção de carne principal:*\n\n{listaCarnes}\n\n_Digite o número da carne desejada (Ex: 1) ou digite sua preferência / observações:_`,
+
+    escolhaBorda: `🍕 Você escolheu: *{item}* ({preco})\n\n🧀 *Deseja adicionar Borda Recheada ou alguma observação?*\n\n{listaBordas}\n\n_Digite o número ou escreva sua observação (Ex: 'Sem cebola'):_`,
+
+    carrinhoResumo: `🛒 *SEU PEDIDO ATUAL:*\n━━━━━━━━━━━━━━━━━━━━\n{resumoCarrinho}\n━━━━━━━━━━━━━━━━━━━━\n💰 *Subtotal Parcial:* {subtotal}\n\n👉 *O que deseja fazer agora?*\n\n1️⃣ ➕ *Adicionar mais itens ao pedido*\n2️⃣ 🛵 *Concluir pedido e informar endereço de entrega*\n\n_Digite *1* para continuar comprando ou *2* para finalizar._`,
+
+    tipoEntrega: `🛵 *COMO DESEJA RECEBER SEU PEDIDO?*\n\n1️⃣ 🛵 *Delivery* (Entregar em casa / Taxa {taxa})\n2️⃣ 🛍️ *Retirada no Balcão* (Buscar no Restaurante sem taxa)\n\n_Digite *1* para Entrega ou *2* para Retirada no Restaurante:_`,
+
+    solicitarEndereco: `📍 *ENDEREÇO DE ENTREGA:*\n\nPor favor, digite seu endereço completo:\n_(Rua, Número, Bairro, Complemento e Ponto de Referência)_\n\n*Exemplo:* Rua das Flores, 142, Bairro Centro, Apto 23 (próximo à praça).`,
+
+    formaPagamento: `📍 Endereço registrado com sucesso:\n*{endereco}*\n\n💳 *Escolha a Forma de Pagamento:*\n\n1️⃣ 🔑 *PIX* (Chave instantânea)\n2️⃣ 💳 *Cartão (Maquininha na Entrega)*\n3️⃣ 💵 *Dinheiro*\n\n_Digite o número da opção (1, 2 ou 3):_`,
+
+    trocoDinheiro: `💵 *PAGAMENTO EM DINHEIRO:*\n\nVocê precisa de troco?\n_Digite o valor para o troco (Ex: *Troco para 50*) ou envie *NÃO* caso tenha o valor exato._`,
+
+    pedidoConfirmadoCliente: `🎉 *PEDIDO RECEBIDO COM SUCESSO!* 🎉\n\n🍽️ *{restaurante}*\n━━━━━━━━━━━━━━━━━━━━\n🎫 *Número do Pedido:* *{codigo}*\n👤 *Cliente:* {nome}\n{localEntrega}\n💳 *Forma de Pagamento:* {formaPagamento}\n{pixInfo}\n━━━━━━━━━━━━━━━━━━━━\n📋 *ITENS:*\n{itens}\n\n💵 *Subtotal:* {subtotal}\n{taxaInfo}💰 *TOTAL A PAGAR: {total}*\n━━━━━━━━━━━━━━━━━━━━\n⏳ *Tempo Estimado:* {tempo}\n👨‍🍳 *Status Atual:* 🟡 _Recebido na cozinha e entrando em preparo!_\n\n💡 *Dica:* A qualquer momento você pode enviar *STATUS* para acompanhar seu pedido!\n\n_Bom apetite e muito obrigado pela preferência!_ 😋🍲🍕`,
+
+    notificacaoCozinha: `🚨 *NOVO PEDIDO CHEGOU!* [{codigo}]\n━━━━━━━━━━━━━━━━━━━━\n👤 *Cliente:* {nome}\n📱 *WhatsApp:* {telefone}\n{localEntrega}\n💳 *Pagamento:* {formaPagamento}\n\n📝 *ITENS DO PEDIDO:*\n{itens}\n\n💵 *Subtotal:* {subtotal}\n🛵 *Taxa Entrega:* {taxa}\n💰 *TOTAL GERAL: {total}*\n━━━━━━━━━━━━━━━━━━━━\n⏰ *Hora:* {hora} | 🆔 *ID:* {id}`,
+
+    pedidoEmPreparo: `👨‍🍳 *Seu pedido [{codigo}] já está no fogo/forno sendo preparado no capricho!*`,
+
+    pedidoSaiuEntrega: `🛵 *Oba! Seu pedido [{codigo}] acabou de sair para entrega e está a caminho!*`,
+
+    pedidoProntoRetirada: `🛍️ *Seu pedido [{codigo}] está prontinho para retirada no balcão!*`,
+
+    pedidoConcluido: `✅ *Pedido [{codigo}] entregue com sucesso! Bom apetite e volte sempre!* 😋❤️`,
+
+    pedidoCancelado: `✅ Seu pedido *{codigo}* foi cancelado com sucesso!\n\nCaso queira fazer um novo pedido, basta enviar *MENU*.`,
+
+    infoRestaurante: `📍 *INFORMAÇÕES & ATENDIMENTO — {restaurante}* 🍽️\n\n🏠 *Endereço:* {endereco}\n🍱 *Horário do Almoço (Marmitex):* {horarioAlmoco}\n🍕 *Horário da Noite (Pizzaria):* {horarioJantar}\n🛵 *Taxa de Entrega:* {taxa}\n🔑 *Chave PIX:* \`{pix}\`\n📅 *Status Hoje:* {statusHoje}\n📱 *Contato / WhatsApp:* {telefoneDono}\n\n_Envie *1* para fazer seu pedido ou *MENU* para ver as opções._`
+};
 
 const DEFAULT_CONFIG = {
     nomeRestaurante: "Restaurante Bom Sabor",
-    nomeSalao: "Restaurante Bom Sabor", // retrocompatibilidade
+    nomeSalao: "Restaurante Bom Sabor",
     slogan: "O melhor sabor da cidade no almoço e no jantar!",
     numeroDono: "5515974062762@c.us",
     chavePix: "15974062762",
@@ -267,15 +344,11 @@ const DEFAULT_CONFIG = {
         5: "Sexta",
         6: "Sábado"
     },
+    categorias: DEFAULT_CATEGORIAS,
     cardapio: DEFAULT_CARDAPIO,
-    opcoesCarnes: OPCOES_CARNES_MARMITEX,
-    servicos: DEFAULT_CARDAPIO.map(item => ({
-        id: item.id,
-        nome: item.nome,
-        preco: item.preco,
-        duracao: item.categoria === 'marmitex' ? 'Almoço' : 'Jantar',
-        icone: item.icone
-    }))
+    opcoesCarnes: DEFAULT_OPCOES_CARNES,
+    opcoesBordas: DEFAULT_OPCOES_BORDAS,
+    mensagens: DEFAULT_MENSAGENS
 };
 
 // Instância do Cliente Supabase
@@ -287,7 +360,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 let cacheLocal = {
     config: DEFAULT_CONFIG,
     pedidos: [],
-    agendamentos: [], // retrocompatibilidade
+    agendamentos: [],
     conversa: {}
 };
 
@@ -299,13 +372,16 @@ function carregarDados() {
             const parsed = JSON.parse(raw);
             
             const config = { ...DEFAULT_CONFIG, ...(parsed.config || {}) };
-            // Garante que o cardápio esteja preenchido
-            if (!config.cardapio || config.cardapio.length === 0) {
-                config.cardapio = DEFAULT_CARDAPIO;
-            }
-            if (!config.nomeRestaurante) {
-                config.nomeRestaurante = "Restaurante Bom Sabor";
-            }
+            
+            // Garante que listas essenciais estejam presentes e completas
+            if (!config.cardapio || config.cardapio.length === 0) config.cardapio = DEFAULT_CARDAPIO;
+            if (!config.categorias || config.categorias.length === 0) config.categorias = DEFAULT_CATEGORIAS;
+            if (!config.opcoesCarnes || config.opcoesCarnes.length === 0) config.opcoesCarnes = DEFAULT_OPCOES_CARNES;
+            if (!config.opcoesBordas || config.opcoesBordas.length === 0) config.opcoesBordas = DEFAULT_OPCOES_BORDAS;
+            
+            config.mensagens = { ...DEFAULT_MENSAGENS, ...(config.mensagens || {}) };
+
+            if (!config.nomeRestaurante) config.nomeRestaurante = "Restaurante Bom Sabor";
             config.nomeSalao = config.nomeRestaurante;
 
             const pedidos = Array.isArray(parsed.pedidos) ? parsed.pedidos : (Array.isArray(parsed.agendamentos) ? parsed.agendamentos : []);
@@ -353,7 +429,7 @@ function salvarDados(data) {
 // Inicializa o cache
 carregarDados();
 
-// Sincronização com Supabase (com fallback gracioso)
+// Sincronização com Supabase (com isolamento multi-tenant restrito por RESTAURANTE_ID)
 async function sincronizarComSupabase() {
     try {
         // 1. Busca Restaurante
@@ -412,7 +488,6 @@ async function sincronizarComSupabase() {
                 concluidoEm: a.concluido_em
             }));
 
-            // Combina com cache local sem duplicatas
             const idsExistentes = new Set(mapped.map(m => m.id));
             const novosDoCache = (cacheLocal.pedidos || []).filter(p => !idsExistentes.has(p.id));
             cacheLocal.pedidos = [...mapped, ...novosDoCache];
@@ -463,9 +538,6 @@ function isFechadoHoje(dados = null) {
 }
 
 // Identifica o turno atual com base na hora do dia
-// - Dia (10:00 às 15:30): Marmitex (Almoço)
-// - Noite (17:30 às 23:59): Pizza (Jantar)
-// - Outros horários: Aberto para pedidos programados / consulta
 function getTurnoAtual() {
     const agora = new Date();
     const hora = agora.getHours();
@@ -500,6 +572,14 @@ function getTurnoAtual() {
     };
 }
 
+// Retorna categorias ativas
+function getCategorias(apenasAtivas = true) {
+    const dados = cacheLocal;
+    let cats = dados.config.categorias || DEFAULT_CATEGORIAS;
+    if (apenasAtivas) cats = cats.filter(c => c.ativo !== false);
+    return cats.sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+}
+
 // Retorna itens do cardápio filtrados por turno ou categoria
 function getCardapio(filtro = {}) {
     const dados = cacheLocal;
@@ -523,10 +603,10 @@ function criarPedido({
     cliente,
     telefone,
     itens = [],
-    tipoEntrega = 'delivery', // 'delivery' ou 'retirada'
+    tipoEntrega = 'delivery',
     enderecoEntrega = '',
     bairro = '',
-    formaPagamento = 'PIX', // 'PIX', 'Cartão', 'Dinheiro'
+    formaPagamento = 'PIX',
     trocoPara = null,
     taxaEntrega = 0,
     observacoes = '',
@@ -545,7 +625,6 @@ function criarPedido({
         };
     }
 
-    // Calcula subtotal dos itens
     let subtotal = 0;
     const itensProcessados = itens.map((item, idx) => {
         const preco = Number(item.preco) || 0;
@@ -586,14 +665,14 @@ function criarPedido({
         subtotal: subtotal,
         taxaEntrega: taxa,
         total: total,
-        preco: total, // compatibilidade
-        tipoEntrega: tipoEntrega, // 'delivery' | 'retirada'
+        preco: total,
+        tipoEntrega: tipoEntrega,
         enderecoEntrega: enderecoEntrega || '',
         bairro: bairro || '',
         formaPagamento: formaPagamento,
         trocoPara: trocoPara ? Number(trocoPara) : null,
         observacoes: observacoes || '',
-        status: 'pendente', // 'pendente', 'em_preparo', 'saiu_entrega', 'concluido', 'cancelado'
+        status: 'pendente',
         origem: origem,
         tempoEstimado: `${dados.config.tempoEstimadoMin || 35} a ${dados.config.tempoEstimadoMax || 50} min`,
         criadoEm: agora.toISOString(),
@@ -632,11 +711,11 @@ function criarPedido({
     return {
         success: true,
         pedido: novoPedido,
-        agendamento: novoPedido // compatibilidade
+        agendamento: novoPedido
     };
 }
 
-// Atualiza o status do pedido (Pendente -> Em Preparo -> Saiu para Entrega -> Concluído)
+// Atualiza o status do pedido
 function atualizarStatusPedido(id, novoStatus) {
     const dados = cacheLocal;
     const pedido = dados.pedidos.find(p => p.id === id || p.codigo === id);
@@ -747,10 +826,10 @@ function getEstatisticas() {
         pedidosConcluidos: concluidosHoje.length,
         faturamentoHoje: faturamentoHoje,
         totalGeral: totalGeral,
-        totalConfirmados: pedidosHoje.length, // compatibilidade
-        totalConcluidos: concluidosHoje.length, // compatibilidade
-        faturamentoEstimado: faturamentoHoje, // compatibilidade
-        agendamentosHoje: pedidosHoje.length // compatibilidade
+        totalConfirmados: pedidosHoje.length,
+        totalConcluidos: concluidosHoje.length,
+        faturamentoEstimado: faturamentoHoje,
+        agendamentosHoje: pedidosHoje.length
     };
 }
 
@@ -769,7 +848,6 @@ function setEstadoConversa(telefone, estado) {
     };
     salvarDados(dados);
 
-    // Persiste no Supabase
     (async () => {
         try {
             await supabase.from('conversas').upsert({
@@ -833,7 +911,7 @@ function salvarConfig(novaConfig) {
     return dados.config;
 }
 
-// Mapeamentos de compatibilidade para código anterior
+// Mapeamentos de compatibilidade
 const criarAgendamento = (params) => {
     return criarPedido({
         cliente: params.cliente,
@@ -859,6 +937,7 @@ module.exports = {
     formatarDataLocal,
     isFechadoHoje,
     getTurnoAtual,
+    getCategorias,
     getCardapio,
     criarPedido,
     atualizarStatusPedido,
@@ -871,7 +950,6 @@ module.exports = {
     limparEstadoConversa,
     getConfig,
     salvarConfig,
-    // Funções de compatibilidade
     criarAgendamento,
     cancelarAgendamento,
     concluirAgendamento,

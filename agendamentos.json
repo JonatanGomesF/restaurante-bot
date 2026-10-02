@@ -23,6 +23,32 @@
       "5": "Sexta",
       "6": "Sábado"
     },
+    "categorias": [
+      {
+        "id": "marmitex",
+        "nome": "Marmitex do Dia (Almoço)",
+        "icone": "🍱",
+        "turno": "dia",
+        "ordem": 1,
+        "ativo": true
+      },
+      {
+        "id": "pizza",
+        "nome": "Pizzas Artesanais (Jantar & Noite)",
+        "icone": "🍕",
+        "turno": "noite",
+        "ordem": 2,
+        "ativo": true
+      },
+      {
+        "id": "bebida",
+        "nome": "Bebidas & Extras",
+        "icone": "🥤",
+        "turno": "todos",
+        "ordem": 3,
+        "ativo": true
+      }
+    ],
     "cardapio": [
       {
         "id": 1,
@@ -232,9 +258,245 @@
       "🧀 Filé de Frango à Parmegiana",
       "🐟 Filé de Peixe Empanado",
       "🍳 Omelete com Queijo e Tomate"
+    ],
+    "opcoesBordas": [
+      {
+        "id": 1,
+        "nome": "Tradicional (Sem borda extra)",
+        "preco": 0,
+        "ativo": true
+      },
+      {
+        "id": 2,
+        "nome": "Borda de Catupiry Original",
+        "preco": 8,
+        "ativo": true
+      },
+      {
+        "id": 3,
+        "nome": "Borda de Cheddar Cremoso",
+        "preco": 8,
+        "ativo": true
+      },
+      {
+        "id": 4,
+        "nome": "Borda de Chocolate ao Leite",
+        "preco": 10,
+        "ativo": true
+      }
+    ],
+    "mensagens": {
+      "menuPrincipal": "🍽️ *BEM-VINDO AO {restaurante}* 🍽️\n\nOlá, *{nome}*! O que você gostaria de saborear hoje?\n\n{avisoTurno}\n{avisoFechado}\n1️⃣ 🛒 *Fazer Pedido (Marmitex / Pizzas / Bebidas)*\n2️⃣ 📋 *Ver Cardápio Completo*\n3️⃣ 🛵 *Acompanhar Meu Pedido (Status)*\n4️⃣ 📍 *Horários, Endereço & Formas de Pagamento*\n5️⃣ ❌ *Cancelar Pedido*\n\n👉 _Digite o número da opção desejada (Ex: *1*):_",
+      "fechadoAviso": "🛑 *AVISO:* O restaurante está fechado hoje ({motivo}).",
+      "escolhaCategoria": "🛒 *FAZER PEDIDO — {restaurante}* 🍽️\n\nEscolha a categoria desejada:\n\n{listaCategorias}\n\n_Digite o número da categoria desejada (Ex: 1):_",
+      "escolhaItem": "{tituloCategoria}\n━━━━━━━━━━━━━━━━━━━━\n\n{listaItens}\n\n👉 *Digite o número da opção que deseja adicionar:* (Ex: 1)\n_Envie *MENU* para voltar ao início._",
+      "escolhaCarne": "🍱 Você escolheu: *{item}* ({preco})\n\n🥩 *Escolha a opção de carne principal:*\n\n{listaCarnes}\n\n_Digite o número da carne desejada (Ex: 1) ou digite sua preferência / observações:_",
+      "escolhaBorda": "🍕 Você escolheu: *{item}* ({preco})\n\n🧀 *Deseja adicionar Borda Recheada ou alguma observação?*\n\n{listaBordas}\n\n_Digite o número ou escreva sua observação (Ex: 'Sem cebola'):_",
+      "carrinhoResumo": "🛒 *SEU PEDIDO ATUAL:*\n━━━━━━━━━━━━━━━━━━━━\n{resumoCarrinho}\n━━━━━━━━━━━━━━━━━━━━\n💰 *Subtotal Parcial:* {subtotal}\n\n👉 *O que deseja fazer agora?*\n\n1️⃣ ➕ *Adicionar mais itens ao pedido*\n2️⃣ 🛵 *Concluir pedido e informar endereço de entrega*\n\n_Digite *1* para continuar comprando ou *2* para finalizar._",
+      "tipoEntrega": "🛵 *COMO DESEJA RECEBER SEU PEDIDO?*\n\n1️⃣ 🛵 *Delivery* (Entregar em casa / Taxa {taxa})\n2️⃣ 🛍️ *Retirada no Balcão* (Buscar no Restaurante sem taxa)\n\n_Digite *1* para Entrega ou *2* para Retirada no Restaurante:_",
+      "solicitarEndereco": "📍 *ENDEREÇO DE ENTREGA:*\n\nPor favor, digite seu endereço completo:\n_(Rua, Número, Bairro, Complemento e Ponto de Referência)_\n\n*Exemplo:* Rua das Flores, 142, Bairro Centro, Apto 23 (próximo à praça).",
+      "formaPagamento": "📍 Endereço registrado com sucesso:\n*{endereco}*\n\n💳 *Escolha a Forma de Pagamento:*\n\n1️⃣ 🔑 *PIX* (Chave instantânea)\n2️⃣ 💳 *Cartão (Maquininha na Entrega)*\n3️⃣ 💵 *Dinheiro*\n\n_Digite o número da opção (1, 2 ou 3):_",
+      "trocoDinheiro": "💵 *PAGAMENTO EM DINHEIRO:*\n\nVocê precisa de troco?\n_Digite o valor para o troco (Ex: *Troco para 50*) ou envie *NÃO* caso tenha o valor exato._",
+      "pedidoConfirmadoCliente": "🎉 *PEDIDO RECEBIDO COM SUCESSO!* 🎉\n\n🍽️ *{restaurante}*\n━━━━━━━━━━━━━━━━━━━━\n🎫 *Número do Pedido:* *{codigo}*\n👤 *Cliente:* {nome}\n{localEntrega}\n💳 *Forma de Pagamento:* {formaPagamento}\n{pixInfo}\n━━━━━━━━━━━━━━━━━━━━\n📋 *ITENS:*\n{itens}\n\n💵 *Subtotal:* {subtotal}\n{taxaInfo}💰 *TOTAL A PAGAR: {total}*\n━━━━━━━━━━━━━━━━━━━━\n⏳ *Tempo Estimado:* {tempo}\n👨‍🍳 *Status Atual:* 🟡 _Recebido na cozinha e entrando em preparo!_\n\n💡 *Dica:* A qualquer momento você pode enviar *STATUS* para acompanhar seu pedido!\n\n_Bom apetite e muito obrigado pela preferência!_ 😋🍲🍕",
+      "notificacaoCozinha": "🚨 *NOVO PEDIDO CHEGOU!* [{codigo}]\n━━━━━━━━━━━━━━━━━━━━\n👤 *Cliente:* {nome}\n📱 *WhatsApp:* {telefone}\n{localEntrega}\n💳 *Pagamento:* {formaPagamento}\n\n📝 *ITENS DO PEDIDO:*\n{itens}\n\n💵 *Subtotal:* {subtotal}\n🛵 *Taxa Entrega:* {taxa}\n💰 *TOTAL GERAL: {total}*\n━━━━━━━━━━━━━━━━━━━━\n⏰ *Hora:* {hora} | 🆔 *ID:* {id}",
+      "pedidoEmPreparo": "👨‍🍳 *Seu pedido [{codigo}] já está no fogo/forno sendo preparado no capricho!*",
+      "pedidoSaiuEntrega": "🛵 *Oba! Seu pedido [{codigo}] acabou de sair para entrega e está a caminho!*",
+      "pedidoProntoRetirada": "🛍️ *Seu pedido [{codigo}] está prontinho para retirada no balcão!*",
+      "pedidoConcluido": "✅ *Pedido [{codigo}] entregue com sucesso! Bom apetite e volte sempre!* 😋❤️",
+      "pedidoCancelado": "✅ Seu pedido *{codigo}* foi cancelado com sucesso!\n\nCaso queira fazer um novo pedido, basta enviar *MENU*.",
+      "infoRestaurante": "📍 *INFORMAÇÕES & ATENDIMENTO — {restaurante}* 🍽️\n\n🏠 *Endereço:* {endereco}\n🍱 *Horário do Almoço (Marmitex):* {horarioAlmoco}\n🍕 *Horário da Noite (Pizzaria):* {horarioJantar}\n🛵 *Taxa de Entrega:* {taxa}\n🔑 *Chave PIX:* `{pix}`\n📅 *Status Hoje:* {statusHoje}\n📱 *Contato / WhatsApp:* {telefoneDono}\n\n_Envie *1* para fazer seu pedido ou *MENU* para ver as opções._"
+    },
+    "servicos": [
+      {
+        "id": 1,
+        "nome": "Marmitex P (Pequena)",
+        "preco": 18,
+        "duracao": "Almoço",
+        "icone": "🍱"
+      },
+      {
+        "id": 2,
+        "nome": "Marmitex M (Média - Mais Vendida)",
+        "preco": 22,
+        "duracao": "Almoço",
+        "icone": "🍱"
+      },
+      {
+        "id": 3,
+        "nome": "Marmitex G (Grande)",
+        "preco": 26,
+        "duracao": "Almoço",
+        "icone": "🍛"
+      },
+      {
+        "id": 4,
+        "nome": "Marmitex Executiva Especial",
+        "preco": 32,
+        "duracao": "Almoço",
+        "icone": "🥩"
+      },
+      {
+        "id": 5,
+        "nome": "Marmitex Fit & Saudável",
+        "preco": 24,
+        "duracao": "Almoço",
+        "icone": "🥗"
+      },
+      {
+        "id": 6,
+        "nome": "Marmitex Feijoada Completa (Especial)",
+        "preco": 28,
+        "duracao": "Almoço",
+        "icone": "🍲"
+      },
+      {
+        "id": 7,
+        "nome": "Pizza Calabresa Especial",
+        "preco": 42,
+        "duracao": "Jantar",
+        "icone": "🍕"
+      },
+      {
+        "id": 8,
+        "nome": "Pizza Mussarela Tradicional",
+        "preco": 40,
+        "duracao": "Jantar",
+        "icone": "🧀"
+      },
+      {
+        "id": 9,
+        "nome": "Pizza Frango com Catupiry",
+        "preco": 48,
+        "duracao": "Jantar",
+        "icone": "🍗"
+      },
+      {
+        "id": 10,
+        "nome": "Pizza Portuguesa Completa",
+        "preco": 46,
+        "duracao": "Jantar",
+        "icone": "🍕"
+      },
+      {
+        "id": 11,
+        "nome": "Pizza Quatro Queijos Nobres",
+        "preco": 52,
+        "duracao": "Jantar",
+        "icone": "🧀"
+      },
+      {
+        "id": 12,
+        "nome": "Pizza Margherita da Casa",
+        "preco": 46,
+        "duracao": "Jantar",
+        "icone": "🌿"
+      },
+      {
+        "id": 13,
+        "nome": "Pizza Doce Brigadeiro com Morangos",
+        "preco": 42,
+        "duracao": "Jantar",
+        "icone": "🍫"
+      },
+      {
+        "id": 14,
+        "nome": "Pizza Doce Banana com Canela",
+        "preco": 38,
+        "duracao": "Jantar",
+        "icone": "🍌"
+      },
+      {
+        "id": 15,
+        "nome": "Coca-Cola 2 Litros (Gelada)",
+        "preco": 14,
+        "duracao": "Jantar",
+        "icone": "🥤"
+      },
+      {
+        "id": 16,
+        "nome": "Coca-Cola Lata 350ml",
+        "preco": 6,
+        "duracao": "Jantar",
+        "icone": "🥤"
+      },
+      {
+        "id": 17,
+        "nome": "Guaraná Antarctica 2 Litros",
+        "preco": 12,
+        "duracao": "Jantar",
+        "icone": "🥤"
+      },
+      {
+        "id": 18,
+        "nome": "Suco Natural da Fruta 500ml",
+        "preco": 8,
+        "duracao": "Jantar",
+        "icone": "🍹"
+      },
+      {
+        "id": 19,
+        "nome": "Água Mineral 500ml",
+        "preco": 4,
+        "duracao": "Jantar",
+        "icone": "💧"
+      },
+      {
+        "id": 20,
+        "nome": "Porção de Batata Frita Crocante",
+        "preco": 22,
+        "duracao": "Jantar",
+        "icone": "🍟"
+      }
     ]
   },
   "pedidos": [
+    {
+      "id": "ped_1790906347126_6421",
+      "codigo": "#PED-6421",
+      "cliente": "Jonatan",
+      "telefone": "97908191973567@lid",
+      "data": "2026-10-01",
+      "horario": "22:59",
+      "itens": [
+        {
+          "id": 3,
+          "nome": "Marmitex G (Grande)",
+          "qtd": 1,
+          "preco": 26,
+          "total": 26,
+          "observacao": "Carne: Q",
+          "opcoesCarne": null,
+          "borda": null
+        },
+        {
+          "id": 16,
+          "nome": "Coca-Cola Lata 350ml",
+          "qtd": 2,
+          "preco": 6,
+          "total": 12,
+          "observacao": "",
+          "opcoesCarne": null,
+          "borda": null
+        }
+      ],
+      "servico": "1x Marmitex G (Grande) + 2x Coca-Cola Lata 350ml",
+      "subtotal": 38,
+      "taxaEntrega": 5,
+      "total": 43,
+      "preco": 43,
+      "tipoEntrega": "delivery",
+      "enderecoEntrega": "Rua das dálias amarelas n218",
+      "bairro": "",
+      "formaPagamento": "PIX",
+      "trocoPara": null,
+      "observacoes": "",
+      "status": "concluido",
+      "origem": "whatsapp",
+      "tempoEstimado": "30 a 50 min",
+      "criadoEm": "2026-10-02T01:59:07.126Z",
+      "canceladoEm": null,
+      "concluidoEm": "2026-10-02T01:59:51.795Z"
+    },
     {
       "id": "ped_demo_01",
       "codigo": "#PED-1024",
@@ -310,6 +572,204 @@
       "criadoEm": "2026-10-01T19:30:00.000Z"
     }
   ],
-  "agendamentos": [],
-  "conversa": {}
+  "agendamentos": [
+    {
+      "id": "ped_1790906347126_6421",
+      "codigo": "#PED-6421",
+      "cliente": "Jonatan",
+      "telefone": "97908191973567@lid",
+      "data": "2026-10-01",
+      "horario": "22:59",
+      "itens": [
+        {
+          "id": 3,
+          "nome": "Marmitex G (Grande)",
+          "qtd": 1,
+          "preco": 26,
+          "total": 26,
+          "observacao": "Carne: Q",
+          "opcoesCarne": null,
+          "borda": null
+        },
+        {
+          "id": 16,
+          "nome": "Coca-Cola Lata 350ml",
+          "qtd": 2,
+          "preco": 6,
+          "total": 12,
+          "observacao": "",
+          "opcoesCarne": null,
+          "borda": null
+        }
+      ],
+      "servico": "1x Marmitex G (Grande) + 2x Coca-Cola Lata 350ml",
+      "subtotal": 38,
+      "taxaEntrega": 5,
+      "total": 43,
+      "preco": 43,
+      "tipoEntrega": "delivery",
+      "enderecoEntrega": "Rua das dálias amarelas n218",
+      "bairro": "",
+      "formaPagamento": "PIX",
+      "trocoPara": null,
+      "observacoes": "",
+      "status": "concluido",
+      "origem": "whatsapp",
+      "tempoEstimado": "30 a 50 min",
+      "criadoEm": "2026-10-02T01:59:07.126Z",
+      "canceladoEm": null,
+      "concluidoEm": "2026-10-02T01:59:51.795Z"
+    },
+    {
+      "id": "ped_demo_01",
+      "codigo": "#PED-1024",
+      "cliente": "Marcos Andrade",
+      "telefone": "5515999991111@c.us",
+      "data": "2026-10-01",
+      "horario": "12:15",
+      "itens": [
+        {
+          "id": 2,
+          "nome": "Marmitex M (Média)",
+          "qtd": 2,
+          "preco": 22,
+          "total": 44,
+          "observacao": "Carne: Bife Bovino Acebolado"
+        },
+        {
+          "id": 16,
+          "nome": "Coca-Cola Lata 350ml",
+          "qtd": 2,
+          "preco": 6,
+          "total": 12
+        }
+      ],
+      "servico": "2x Marmitex M + 2x Coca-Cola Lata",
+      "subtotal": 56,
+      "taxaEntrega": 5,
+      "total": 61,
+      "preco": 61,
+      "tipoEntrega": "delivery",
+      "enderecoEntrega": "Av. Brasil, 450 - Centro (Apto 302)",
+      "formaPagamento": "PIX",
+      "status": "em_preparo",
+      "origem": "whatsapp",
+      "tempoEstimado": "35 a 50 min",
+      "criadoEm": "2026-10-01T15:15:00.000Z"
+    },
+    {
+      "id": "ped_demo_02",
+      "codigo": "#PED-1025",
+      "cliente": "Juliana Santos",
+      "telefone": "5515988882222@c.us",
+      "data": "2026-10-01",
+      "horario": "19:30",
+      "itens": [
+        {
+          "id": 7,
+          "nome": "Pizza Calabresa Especial",
+          "qtd": 1,
+          "preco": 42,
+          "total": 42,
+          "observacao": "Borda de Catupiry"
+        },
+        {
+          "id": 15,
+          "nome": "Coca-Cola 2 Litros (Gelada)",
+          "qtd": 1,
+          "preco": 14,
+          "total": 14
+        }
+      ],
+      "servico": "1x Pizza Calabresa + 1x Coca-Cola 2L",
+      "subtotal": 56,
+      "taxaEntrega": 5,
+      "total": 61,
+      "preco": 61,
+      "tipoEntrega": "delivery",
+      "enderecoEntrega": "Rua das Palmeiras, 88 - Bairro Jardim",
+      "formaPagamento": "Cartão (Maquininha)",
+      "status": "pendente",
+      "origem": "whatsapp",
+      "tempoEstimado": "35 a 50 min",
+      "criadoEm": "2026-10-01T19:30:00.000Z"
+    }
+  ],
+  "conversa": {
+    "5511999998888@c.us": {
+      "status": "waiting_item",
+      "carrinho": [],
+      "atualizadoEm": 1790906856807,
+      "categoriaAtual": {
+        "id": "marmitex",
+        "nome": "Marmitex do Dia (Almoço)",
+        "icone": "🍱",
+        "turno": "dia",
+        "ordem": 1,
+        "ativo": true
+      },
+      "itensExibidos": [
+        {
+          "id": 1,
+          "categoria": "marmitex",
+          "nome": "Marmitex P (Pequena)",
+          "descricao": "Arroz branco, feijão caseiro, 1 opção de carne e guarnição do dia",
+          "preco": 18,
+          "turno": "dia",
+          "icone": "🍱",
+          "ativo": true
+        },
+        {
+          "id": 2,
+          "categoria": "marmitex",
+          "nome": "Marmitex M (Média - Mais Vendida)",
+          "descricao": "Arroz branco, feijão fresquinho, carne generosa, farofa e guarnições",
+          "preco": 22,
+          "turno": "dia",
+          "icone": "🍱",
+          "ativo": true
+        },
+        {
+          "id": 3,
+          "categoria": "marmitex",
+          "nome": "Marmitex G (Grande)",
+          "descricao": "Porção reforçada: Arroz, feijão, 2 carnes à sua escolha, salada e acompanhamentos",
+          "preco": 26,
+          "turno": "dia",
+          "icone": "🍛",
+          "ativo": true
+        },
+        {
+          "id": 4,
+          "categoria": "marmitex",
+          "nome": "Marmitex Executiva Especial",
+          "descricao": "Bife de Picanha na chapa ou Filé Parmegiana com fritas crocantes e salada",
+          "preco": 32,
+          "turno": "dia",
+          "icone": "🥩",
+          "ativo": true
+        },
+        {
+          "id": 5,
+          "categoria": "marmitex",
+          "nome": "Marmitex Fit & Saudável",
+          "descricao": "Arroz integral, peito de frango grelhado suculento e mix de legumes cozidos no vapor",
+          "preco": 24,
+          "turno": "dia",
+          "icone": "🥗",
+          "ativo": true
+        },
+        {
+          "id": 6,
+          "categoria": "marmitex",
+          "nome": "Marmitex Feijoada Completa (Especial)",
+          "descricao": "Feijoada tradicional com carnes selecionadas, couve refogada, farofa e torresmo",
+          "preco": 28,
+          "turno": "dia",
+          "icone": "🍲",
+          "ativo": true
+        }
+      ]
+    }
+  }
 }

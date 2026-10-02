@@ -59,7 +59,7 @@ app.get('/api/status', (req, res) => {
     });
 });
 
-// 1.1 Endpoint de Imagem Direta do QR Code (PNG)
+// 1.1 Imagem QR Code (PNG)
 app.get('/api/qr.png', async (req, res) => {
     const status = whatsappManager.getStatus();
     if (!status.qr) {
@@ -71,10 +71,7 @@ app.get('/api/qr.png', async (req, res) => {
         const buffer = await QRCode.toBuffer(status.qr, {
             width: 320,
             margin: 2,
-            color: {
-                dark: '#0F172A',
-                light: '#FFFFFF'
-            }
+            color: { dark: '#0F172A', light: '#FFFFFF' }
         });
         res.setHeader('Content-Type', 'image/png');
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -84,7 +81,7 @@ app.get('/api/qr.png', async (req, res) => {
     }
 });
 
-// 1.2 Endpoint Simples de QR Code
+// 1.2 QR Code Simples
 app.get('/api/bot/qr', (req, res) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     const status = whatsappManager.getStatus();
@@ -95,7 +92,7 @@ app.get('/api/bot/qr', (req, res) => {
     });
 });
 
-// 2. Listagem de Pedidos com filtros (e compatibilidade /api/appointments)
+// 2. Listagem de Pedidos com filtros
 app.get(['/api/orders', '/api/appointments'], (req, res) => {
     const { data, status, busca } = req.query;
     const pedidos = db.getTodosPedidos({ data, status, busca });
@@ -146,18 +143,23 @@ app.put('/api/orders/:id/status', async (req, res) => {
     io.emit('agendamento_atualizado', resultado.pedido);
     io.emit('stats_update', db.getEstatisticas());
 
-    // Se solicitado e o WhatsApp estiver conectado, notifica o cliente
+    // Se solicitado e o WhatsApp estiver conectado, notifica o cliente com template configurado
     if (avisarCliente && resultado.pedido.telefone && whatsappManager.status === 'READY') {
         const ped = resultado.pedido;
+        const config = db.getConfig();
+        const mensagens = config.mensagens || {};
         let msgStatus = '';
+
         if (status === 'em_preparo') {
-            msgStatus = `👨‍🍳 *Seu pedido [${ped.codigo}] já está no fogo/forno sendo preparado no capricho!*`;
+            msgStatus = (mensagens.pedidoEmPreparo || '👨‍🍳 *Seu pedido [{codigo}] já está no fogo/forno sendo preparado no capricho!*').replace('{codigo}', ped.codigo);
         } else if (status === 'saiu_entrega') {
-            msgStatus = ped.tipoEntrega === 'delivery'
-                ? `🛵 *Oba! Seu pedido [${ped.codigo}] acabou de sair para entrega e está a caminho!*`
-                : `🛍️ *Seu pedido [${ped.codigo}] está prontinho para retirada no balcão!*`;
+            if (ped.tipoEntrega === 'delivery') {
+                msgStatus = (mensagens.pedidoSaiuEntrega || '🛵 *Oba! Seu pedido [{codigo}] acabou de sair para entrega e está a caminho!*').replace('{codigo}', ped.codigo);
+            } else {
+                msgStatus = (mensagens.pedidoProntoRetirada || '🛍️ *Seu pedido [{codigo}] está prontinho para retirada no balcão!*').replace('{codigo}', ped.codigo);
+            }
         } else if (status === 'concluido') {
-            msgStatus = `✅ *Pedido [${ped.codigo}] entregue com sucesso! Bom apetite e volte sempre!* 😋❤️`;
+            msgStatus = (mensagens.pedidoConcluido || '✅ *Pedido [{codigo}] entregue com sucesso! Bom apetite e volte sempre!* 😋❤️').replace('{codigo}', ped.codigo);
         }
 
         if (msgStatus) {
@@ -198,12 +200,15 @@ app.put(['/api/orders/:id/concluir', '/api/appointments/:id/concluir'], (req, re
     res.json(resultado);
 });
 
-// 5. Cardápio do Restaurante
+// -----------------------------
+// 5. GESTÃO DO CARDÁPIO & ITENS (CRUD)
+// -----------------------------
 app.get('/api/menu', (req, res) => {
     const cardapio = db.getCardapio({ apenasAtivos: false });
     res.json(cardapio);
 });
 
+// Salvar cardápio completo ou adicionar/editar item
 app.post('/api/menu', (req, res) => {
     const novoCardapio = req.body;
     const configAtual = db.getConfig();
@@ -212,13 +217,123 @@ app.post('/api/menu', (req, res) => {
     res.json({ success: true, cardapio: salva.cardapio });
 });
 
-// 6. Métricas e Estatísticas
+app.post('/api/menu/item', (req, res) => {
+    const { id, nome, categoria, preco, turno, icone, descricao, ativo } = req.body;
+    const configAtual = db.getConfig();
+    let cardapio = [...(configAtual.cardapio || [])];
+
+    if (id) {
+        // Atualizar item existente
+        const index = cardapio.findIndex(i => i.id === Number(id));
+        if (index !== -1) {
+            cardapio[index] = {
+                ...cardapio[index],
+                nome: nome !== undefined ? nome : cardapio[index].nome,
+                categoria: categoria !== undefined ? categoria : cardapio[index].categoria,
+                preco: preco !== undefined ? Number(preco) : cardapio[index].preco,
+                turno: turno !== undefined ? turno : cardapio[index].turno,
+                icone: icone !== undefined ? icone : cardapio[index].icone,
+                descricao: descricao !== undefined ? descricao : cardapio[index].descricao,
+                ativo: ativo !== undefined ? Boolean(ativo) : cardapio[index].ativo
+            };
+        }
+    } else {
+        // Criar novo item
+        const maxId = cardapio.reduce((max, curr) => Math.max(max, curr.id || 0), 0);
+        const novoItem = {
+            id: maxId + 1,
+            nome: nome || 'Novo Prato',
+            categoria: categoria || 'marmitex',
+            preco: Number(preco) || 20.00,
+            turno: turno || 'todos',
+            icone: icone || '🍽️',
+            descricao: descricao || '',
+            ativo: ativo !== undefined ? Boolean(ativo) : true
+        };
+        cardapio.push(novoItem);
+    }
+
+    const salva = db.salvarConfig({ ...configAtual, cardapio });
+    io.emit('config_atualizada', salva);
+    res.json({ success: true, cardapio: salva.cardapio });
+});
+
+app.delete('/api/menu/item/:id', (req, res) => {
+    const itemId = Number(req.params.id);
+    const configAtual = db.getConfig();
+    const cardapio = (configAtual.cardapio || []).filter(i => i.id !== itemId);
+    const salva = db.salvarConfig({ ...configAtual, cardapio });
+    io.emit('config_atualizada', salva);
+    res.json({ success: true, cardapio: salva.cardapio });
+});
+
+// -----------------------------
+// 6. GESTÃO DE CATEGORIAS, CARNES E BORDAS
+// -----------------------------
+app.get('/api/categories', (req, res) => {
+    res.json(db.getCategorias(false));
+});
+
+app.post('/api/categories', (req, res) => {
+    const categorias = req.body;
+    const configAtual = db.getConfig();
+    const salva = db.salvarConfig({ ...configAtual, categorias });
+    io.emit('config_atualizada', salva);
+    res.json({ success: true, categorias: salva.categorias });
+});
+
+// Carnes para Marmitex
+app.get('/api/options/meats', (req, res) => {
+    const config = db.getConfig();
+    res.json(config.opcoesCarnes || []);
+});
+
+app.post('/api/options/meats', (req, res) => {
+    const opcoesCarnes = req.body;
+    const configAtual = db.getConfig();
+    const salva = db.salvarConfig({ ...configAtual, opcoesCarnes });
+    io.emit('config_atualizada', salva);
+    res.json({ success: true, opcoesCarnes: salva.opcoesCarnes });
+});
+
+// Bordas para Pizzas
+app.get('/api/options/crusts', (req, res) => {
+    const config = db.getConfig();
+    res.json(config.opcoesBordas || []);
+});
+
+app.post('/api/options/crusts', (req, res) => {
+    const opcoesBordas = req.body;
+    const configAtual = db.getConfig();
+    const salva = db.salvarConfig({ ...configAtual, opcoesBordas });
+    io.emit('config_atualizada', salva);
+    res.json({ success: true, opcoesBordas: salva.opcoesBordas });
+});
+
+// -----------------------------
+// 7. GESTÃO DE MENSAGENS DO BOT (EDITOR DE RESPOSTAS AUTOMÁTICAS)
+// -----------------------------
+app.get('/api/messages', (req, res) => {
+    const config = db.getConfig();
+    res.json(config.mensagens || {});
+});
+
+app.post('/api/messages', (req, res) => {
+    const novasMensagens = req.body;
+    const configAtual = db.getConfig();
+    const mensagensAtualizadas = { ...(configAtual.mensagens || {}), ...novasMensagens };
+    const salva = db.salvarConfig({ ...configAtual, mensagens: mensagensAtualizadas });
+    io.emit('config_atualizada', salva);
+    res.json({ success: true, mensagens: salva.mensagens });
+});
+
+// 8. Métricas e Estatísticas
 app.get('/api/stats', (req, res) => {
     const stats = db.getEstatisticas();
     res.json(stats);
 });
 
-// 7. Configurações do Restaurante
+// 9. Configurações Gerais do Restaurante
 app.get('/api/config', (req, res) => {
     const config = db.getConfig();
     res.json(config);
@@ -232,7 +347,7 @@ app.post('/api/config', (req, res) => {
     res.json({ success: true, config: salva });
 });
 
-// 7.1 Alternar Modo "HOJE ESTAMOS FECHADOS"
+// 9.1 Alternar Modo "HOJE ESTAMOS FECHADOS"
 app.post('/api/config/fechado-hoje', (req, res) => {
     const { fechado, motivo } = req.body;
     const configAtual = db.getConfig();
@@ -256,7 +371,7 @@ app.post('/api/config/fechado-hoje', (req, res) => {
     });
 });
 
-// 8. Ações do Bot WhatsApp
+// 10. Ações do Bot WhatsApp
 app.post('/api/bot/restart', async (req, res) => {
     try {
         await whatsappManager.restart();
@@ -271,7 +386,7 @@ app.post('/api/bot/logout', async (req, res) => {
     res.json(resultado);
 });
 
-// 9. Simulador de Pedidos via WhatsApp (Testes Direto no Navegador)
+// 11. Simulador de Pedidos via WhatsApp (Testes Direto no Navegador)
 app.post('/api/simulator/chat', async (req, res) => {
     const { telefone = '5511999998888@c.us', nome = 'Cliente Teste', mensagem } = req.body;
 
@@ -299,7 +414,7 @@ app.post('/api/simulator/chat', async (req, res) => {
     });
 });
 
-// 10. Auto-Update de Layout via GitHub
+// 12. Auto-Update de Layout via GitHub
 app.get('/api/system/version', (req, res) => {
     res.json(updater.obterVersaoLocal());
 });
@@ -323,7 +438,6 @@ app.use((req, res, next) => {
 // -----------------------------
 io.on('connection', (socket) => {
     console.log(`🔌 Novo cliente conectado ao Painel (Socket ID: ${socket.id})`);
-
     socket.emit('status_change', whatsappManager.getStatus());
     socket.emit('stats_update', db.getEstatisticas());
 });
@@ -333,7 +447,6 @@ io.on('connection', (socket) => {
 // -----------------------------
 function startServer() {
     db.inicializarDatabase();
-
     updater.verificarEAtualizarLayout(false).catch(() => {});
 
     server.on('error', (err) => {
@@ -347,8 +460,8 @@ function startServer() {
 
     server.listen(PORT, () => {
         console.log(`\n======================================================`);
-        console.log(`🚀 [PAINEL DO RESTAURANTE ONLINE] Acesse http://localhost:${PORT}`);
-        console.log(`🍽️ Restaurante Bom Sabor — Marmitex (Dia) & Pizzaria (Noite)`);
+        console.log(`🚀 [PAINEL ADMINISTRATIVO ONLINE] Acesse http://localhost:${PORT}`);
+        console.log(`🍽️ Restaurante Bom Sabor — Sistema 100% Configurável Ativo`);
         console.log(`======================================================\n`);
         
         whatsappManager.initialize();

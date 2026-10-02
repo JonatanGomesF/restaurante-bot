@@ -1,4 +1,4 @@
-// Restaurante Bom Sabor & WhatsApp Delivery Hub Engine
+// Restaurante Bom Sabor & WhatsApp Delivery Hub Engine (Admin 100% Configurável)
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) {
         lucide.createIcons();
@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTab: 'tab-qrcode',
         selectedDate: getTodayDateString(),
         menu: [],
+        meats: [],
+        crusts: [],
+        messages: {},
         activeMenuFilter: 'marmitex',
         config: {},
         stats: {},
@@ -67,8 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Live Orders Cozinha
         calendarSelectedDateLabel: document.getElementById('calendar-selected-date-label'),
         calendarSelectedDateSub: document.getElementById('calendar-selected-date-sub'),
-        btnPrevDay: document.getElementById('btn-prev-day'),
-        btnNextDay: document.getElementById('btn-next-day'),
         slotsGridContainer: document.getElementById('slots-grid-container'),
         calendarClosedAlert: document.getElementById('calendar-closed-alert'),
         calendarClosedReason: document.getElementById('calendar-closed-reason'),
@@ -106,15 +107,63 @@ document.addEventListener('DOMContentLoaded', () => {
         btnToggleFechadoHoje: document.getElementById('btn-toggle-fechado-hoje'),
         txtBtnToggleFechado: document.getElementById('txt-btn-toggle-fechado'),
 
-        // Cardápio
+        // Cardápio & Itens
         servicesListContainer: document.getElementById('services-list-container'),
-        btnAddService: document.getElementById('btn-add-service'),
+        btnModalNovoItem: document.getElementById('btn-modal-novo-item'),
+        modalItemCardapio: document.getElementById('modal-item-cardapio'),
+        modalItemTitle: document.getElementById('modal-item-title'),
+        btnCloseModalItem: document.getElementById('btn-close-modal-item'),
+        btnCancelModalItem: document.getElementById('btn-cancel-modal-item'),
+        formItemCardapio: document.getElementById('form-item-cardapio'),
+        modalItemId: document.getElementById('modal-item-id'),
+        modalItemNome: document.getElementById('modal-item-nome'),
+        modalItemCategoria: document.getElementById('modal-item-categoria'),
+        modalItemPreco: document.getElementById('modal-item-preco'),
+        modalItemTurno: document.getElementById('modal-item-turno'),
+        modalItemIcone: document.getElementById('modal-item-icone'),
+        modalItemDescricao: document.getElementById('modal-item-descricao'),
+
+        // Filtros Cardápio
         btnFilterMarmitex: document.getElementById('btn-filter-marmitex'),
         btnFilterPizza: document.getElementById('btn-filter-pizza'),
         btnFilterBebidas: document.getElementById('btn-filter-bebidas'),
         btnFilterTodos: document.getElementById('btn-filter-todos'),
 
-        // Modal
+        // Carnes & Bordas
+        inputNovaCarne: document.getElementById('input-nova-carne'),
+        btnAddCarne: document.getElementById('btn-add-carne'),
+        listaCarnesContainer: document.getElementById('lista-carnes-container'),
+        inputNovaBordaNome: document.getElementById('input-nova-borda-nome'),
+        inputNovaBordaPreco: document.getElementById('input-nova-borda-preco'),
+        btnAddBorda: document.getElementById('btn-add-borda'),
+        listaBordasContainer: document.getElementById('lista-bordas-container'),
+
+        // Mensagens do Bot
+        formMensagensBot: document.getElementById('form-mensagens-bot'),
+        btnSaveAllMessages: document.getElementById('btn-save-all-messages'),
+        btnRestoreDefaultMessages: document.getElementById('btn-restore-default-messages'),
+
+        // Campos de Mensagens
+        msgMenuPrincipal: document.getElementById('msg-menuPrincipal'),
+        msgFechadoAviso: document.getElementById('msg-fechadoAviso'),
+        msgEscolhaCategoria: document.getElementById('msg-escolhaCategoria'),
+        msgEscolhaCarne: document.getElementById('msg-escolhaCarne'),
+        msgEscolhaBorda: document.getElementById('msg-escolhaBorda'),
+        msgCarrinhoResumo: document.getElementById('msg-carrinhoResumo'),
+        msgTipoEntrega: document.getElementById('msg-tipoEntrega'),
+        msgSolicitarEndereco: document.getElementById('msg-solicitarEndereco'),
+        msgFormaPagamento: document.getElementById('msg-formaPagamento'),
+        msgTrocoDinheiro: document.getElementById('msg-trocoDinheiro'),
+        msgPedidoConfirmadoCliente: document.getElementById('msg-pedidoConfirmadoCliente'),
+        msgNotificacaoCozinha: document.getElementById('msg-notificacaoCozinha'),
+        msgPedidoEmPreparo: document.getElementById('msg-pedidoEmPreparo'),
+        msgPedidoSaiuEntrega: document.getElementById('msg-pedidoSaiuEntrega'),
+        msgPedidoProntoRetirada: document.getElementById('msg-pedidoProntoRetirada'),
+        msgPedidoConcluido: document.getElementById('msg-pedidoConcluido'),
+        msgPedidoCancelado: document.getElementById('msg-pedidoCancelado'),
+        msgInfoRestaurante: document.getElementById('msg-infoRestaurante'),
+
+        // Modal Pedido Manual
         btnModalNovoAgendamento: document.getElementById('btn-modal-novo-agendamento'),
         modalAgendamento: document.getElementById('modal-agendamento'),
         btnCloseModal: document.getElementById('btn-close-modal'),
@@ -283,26 +332,35 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.pageSubtitle.textContent = 'Escaneie o código para ativar o bot de pedidos automáticos';
         } else if (tabId === 'tab-calendar') {
             elements.pageTitle.textContent = 'Cozinha & Pedidos ao Vivo';
-            elements.pageSubtitle.textContent = 'Painel em tempo real de pedidos de marmitex e pizzas';
+            elements.pageSubtitle.textContent = 'Acompanhe o status e despache pedidos em tempo real';
             renderLiveOrders();
         } else if (tabId === 'tab-appointments') {
             elements.pageTitle.textContent = 'Histórico de Pedidos';
-            elements.pageSubtitle.textContent = 'Registro de todas as vendas, delivery e retiradas';
+            elements.pageSubtitle.textContent = 'Registro detalhado de vendas, delivery e retiradas';
             renderOrdersTable();
+        } else if (tabId === 'tab-menu-manager') {
+            elements.pageTitle.textContent = 'Cardápio, Carnes & Bordas Recheadas';
+            elements.pageSubtitle.textContent = 'Cadastre pratos, marmitex, pizzas, carnes e adicionais';
+            renderMenuList();
+            renderMeatsList();
+            renderCrustsList();
+        } else if (tabId === 'tab-messages-manager') {
+            elements.pageTitle.textContent = 'Mensagens do WhatsApp (100% Customizável)';
+            elements.pageSubtitle.textContent = 'Edite cada frase, menu e resposta automática enviada aos clientes';
+            renderMessagesForm();
+        } else if (tabId === 'tab-settings') {
+            elements.pageTitle.textContent = 'Configurações Gerais do Restaurante';
+            elements.pageSubtitle.textContent = 'Horários de almoço/jantar, taxa de entrega, PIX e fechamento emergencial';
         } else if (tabId === 'tab-simulator') {
             elements.pageTitle.textContent = 'Simulador de WhatsApp & Logs';
-            elements.pageSubtitle.textContent = 'Teste o cardápio e faça pedidos como se fosse um cliente no WhatsApp';
-        } else if (tabId === 'tab-settings') {
-            elements.pageTitle.textContent = 'Cardápio & Restaurante';
-            elements.pageSubtitle.textContent = 'Personalize itens de marmitex, pizzas, taxas e horários';
-            renderMenuList();
+            elements.pageSubtitle.textContent = 'Teste o atendimento do bot como se fosse um cliente no WhatsApp';
         }
 
         if (window.lucide) lucide.createIcons();
     }
 
     // ------------------------------------------------------------------
-    // API REST Calls
+    // API Calls
     // ------------------------------------------------------------------
     async function fetchStatus() {
         try {
@@ -337,6 +395,36 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {}
     }
 
+    async function fetchMeats() {
+        try {
+            const res = await fetch(`/api/options/meats?t=${Date.now()}`);
+            if (res.ok) {
+                state.meats = await res.json();
+                renderMeatsList();
+            }
+        } catch (e) {}
+    }
+
+    async function fetchCrusts() {
+        try {
+            const res = await fetch(`/api/options/crusts?t=${Date.now()}`);
+            if (res.ok) {
+                state.crusts = await res.json();
+                renderCrustsList();
+            }
+        } catch (e) {}
+    }
+
+    async function fetchMessages() {
+        try {
+            const res = await fetch(`/api/messages?t=${Date.now()}`);
+            if (res.ok) {
+                state.messages = await res.json();
+                renderMessagesForm();
+            }
+        } catch (e) {}
+    }
+
     async function fetchConfig() {
         try {
             const res = await fetch(`/api/config?t=${Date.now()}`);
@@ -348,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function refreshData() {
-        await Promise.all([fetchStatus(), fetchOrders(), fetchMenu(), fetchConfig()]);
+        await Promise.all([fetchStatus(), fetchOrders(), fetchMenu(), fetchMeats(), fetchCrusts(), fetchMessages(), fetchConfig()]);
     }
 
     // ------------------------------------------------------------------
@@ -432,7 +520,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elements.sidebarSalonName) elements.sidebarSalonName.textContent = nome;
         if (elements.simBarberTitle) elements.simBarberTitle.textContent = nome;
 
-        // Fechado hoje
         const fechado = Boolean(cfg.fechadoHoje);
         if (elements.badgeStatusFechado) {
             elements.badgeStatusFechado.className = `closed-status-pill ${fechado ? 'closed' : 'open'}`;
@@ -520,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div class="order-total-row">
-                        <span>Total a Receber:</span>
+                        <span>Total:</span>
                         <span style="color: var(--neon-amber);">${formatarMoeda(ped.total || ped.preco)}</span>
                     </div>
 
@@ -546,7 +633,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }).join('');
 
-        // Event listeners para alterar status
         document.querySelectorAll('.btn-change-status').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = e.currentTarget.getAttribute('data-id');
@@ -603,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.appointmentsTableBody.innerHTML = `
                 <tr>
                     <td colspan="9" style="text-align: center; padding: 30px; color: var(--text-muted);">
-                        Nenhum pedido encontrado com os filtros selecionados.
+                        Nenhum pedido encontrado.
                     </td>
                 </tr>
             `;
@@ -663,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elements.searchAppointments) elements.searchAppointments.addEventListener('input', renderOrdersTable);
 
     // ------------------------------------------------------------------
-    // RENDER: CARDÁPIO (MARMITEX, PIZZAS & BEBIDAS)
+    // RENDER: CARDÁPIO (CRUD DE ITENS)
     // ------------------------------------------------------------------
     function renderMenuList() {
         if (!elements.servicesListContainer) return;
@@ -678,16 +764,44 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.servicesListContainer.innerHTML = itens.map(it => {
             return `
                 <div class="service-card-item">
-                    <div class="service-card-info">
+                    <div class="service-card-info" style="flex: 1;">
                         <strong>${it.icone || '🍽️'} ${escapeHtml(it.nome)}</strong>
-                        <span>${escapeHtml(it.descricao || '')}</span>
+                        <span style="display: block; margin-top: 2px;">${escapeHtml(it.descricao || '')}</span>
+                        <small style="color: var(--neon-amber); font-weight: 600; display: block; margin-top: 4px;">Turno: ${it.turno || 'todos'}</small>
                     </div>
-                    <div class="service-card-price">
-                        ${formatarMoeda(it.preco)}
+                    <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                        <div class="service-card-price">${formatarMoeda(it.preco)}</div>
+                        <div style="display: flex; gap: 6px;">
+                            <button class="btn btn-secondary btn-xs btn-edit-item" data-id="${it.id}" title="Editar">
+                                <i data-lucide="edit-3"></i>
+                            </button>
+                            <button class="btn btn-danger-outline btn-xs btn-delete-item" data-id="${it.id}" title="Excluir">
+                                <i data-lucide="trash-2"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
         }).join('');
+
+        document.querySelectorAll('.btn-edit-item').forEach(b => {
+            b.addEventListener('click', () => {
+                const id = Number(b.getAttribute('data-id'));
+                const item = state.menu.find(m => m.id === id);
+                if (item) abrirModalEditarItem(item);
+            });
+        });
+
+        document.querySelectorAll('.btn-delete-item').forEach(b => {
+            b.addEventListener('click', async () => {
+                const id = Number(b.getAttribute('data-id'));
+                if (confirm('Tem certeza que deseja excluir este item do cardápio?')) {
+                    await excluirItemCardapio(id);
+                }
+            });
+        });
+
+        if (window.lucide) lucide.createIcons();
     }
 
     function setupMenuFilters() {
@@ -711,6 +825,273 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setupMenuFilters();
 
+    function abrirModalNovoItem() {
+        if (!elements.modalItemCardapio) return;
+        elements.modalItemTitle.innerHTML = '<i data-lucide="plus-circle"></i> Adicionar Novo Prato / Item';
+        elements.modalItemId.value = '';
+        elements.formItemCardapio.reset();
+        elements.modalItemIcone.value = '🍽️';
+        elements.modalItemCardapio.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function abrirModalEditarItem(item) {
+        if (!elements.modalItemCardapio) return;
+        elements.modalItemTitle.innerHTML = '<i data-lucide="edit-3"></i> Editar Item do Cardápio';
+        elements.modalItemId.value = item.id;
+        elements.modalItemNome.value = item.nome;
+        elements.modalItemCategoria.value = item.categoria || 'marmitex';
+        elements.modalItemPreco.value = item.preco;
+        elements.modalItemTurno.value = item.turno || 'todos';
+        elements.modalItemIcone.value = item.icone || '🍽️';
+        elements.modalItemDescricao.value = item.descricao || '';
+        elements.modalItemCardapio.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    if (elements.btnModalNovoItem) elements.btnModalNovoItem.addEventListener('click', abrirModalNovoItem);
+    if (elements.btnCloseModalItem) elements.btnCloseModalItem.addEventListener('click', () => elements.modalItemCardapio.classList.add('hidden'));
+    if (elements.btnCancelModalItem) elements.btnCancelModalItem.addEventListener('click', () => elements.modalItemCardapio.classList.add('hidden'));
+
+    if (elements.formItemCardapio) {
+        elements.formItemCardapio.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = elements.modalItemId.value ? Number(elements.modalItemId.value) : null;
+            const payload = {
+                id,
+                nome: elements.modalItemNome.value,
+                categoria: elements.modalItemCategoria.value,
+                preco: Number(elements.modalItemPreco.value) || 0,
+                turno: elements.modalItemTurno.value,
+                icone: elements.modalItemIcone.value || '🍽️',
+                descricao: elements.modalItemDescricao.value || '',
+                ativo: true
+            };
+
+            try {
+                const res = await fetch('/api/menu/item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    showToast(id ? 'Item atualizado!' : 'Novo item adicionado ao cardápio!', 'success');
+                    elements.modalItemCardapio.classList.add('hidden');
+                    fetchMenu();
+                }
+            } catch (err) {
+                showToast('Erro ao salvar item.', 'error');
+            }
+        });
+    }
+
+    async function excluirItemCardapio(id) {
+        try {
+            const res = await fetch(`/api/menu/item/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Item removido do cardápio!', 'info');
+                fetchMenu();
+            }
+        } catch (err) {}
+    }
+
+    // ------------------------------------------------------------------
+    // RENDER: CARNES & BORDAS
+    // ------------------------------------------------------------------
+    function renderMeatsList() {
+        if (!elements.listaCarnesContainer) return;
+        const carnes = state.meats || [];
+
+        elements.listaCarnesContainer.innerHTML = carnes.map((c, i) => {
+            const nomeCarne = typeof c === 'string' ? c : c.nome;
+            return `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <span>${escapeHtml(nomeCarne)}</span>
+                    <button class="btn btn-danger-outline btn-xs btn-delete-carne" data-index="${i}">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        document.querySelectorAll('.btn-delete-carne').forEach(b => {
+            b.addEventListener('click', async () => {
+                const idx = Number(b.getAttribute('data-index'));
+                const novasCarnes = state.meats.filter((_, i) => i !== idx);
+                await salvarCarnes(novasCarnes);
+            });
+        });
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    async function salvarCarnes(novasCarnes) {
+        try {
+            const res = await fetch('/api/options/meats', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(novasCarnes)
+            });
+            if (res.ok) {
+                state.meats = novasCarnes;
+                renderMeatsList();
+                showToast('Opções de carnes atualizadas!', 'success');
+            }
+        } catch (e) {}
+    }
+
+    if (elements.btnAddCarne) {
+        elements.btnAddCarne.addEventListener('click', async () => {
+            const input = elements.inputNovaCarne;
+            if (!input || !input.value.trim()) return;
+            const novaCarne = input.value.trim();
+            input.value = '';
+            const novasCarnes = [...(state.meats || []), { id: Date.now(), nome: novaCarne, ativo: true }];
+            await salvarCarnes(novasCarnes);
+        });
+    }
+
+    function renderCrustsList() {
+        if (!elements.listaBordasContainer) return;
+        const bordas = state.crusts || [];
+
+        elements.listaBordasContainer.innerHTML = bordas.map((b, i) => {
+            return `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-elevated); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <div>
+                        <strong>${escapeHtml(b.nome)}</strong>
+                        <small style="color: var(--neon-amber); margin-left: 8px;">+ ${formatarMoeda(b.preco)}</small>
+                    </div>
+                    <button class="btn btn-danger-outline btn-xs btn-delete-borda" data-index="${i}">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        document.querySelectorAll('.btn-delete-borda').forEach(b => {
+            b.addEventListener('click', async () => {
+                const idx = Number(b.getAttribute('data-index'));
+                const novasBordas = state.crusts.filter((_, i) => i !== idx);
+                await salvarBordas(novasBordas);
+            });
+        });
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    async function salvarBordas(novasBordas) {
+        try {
+            const res = await fetch('/api/options/crusts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(novasBordas)
+            });
+            if (res.ok) {
+                state.crusts = novasBordas;
+                renderCrustsList();
+                showToast('Bordas de pizza atualizadas!', 'success');
+            }
+        } catch (e) {}
+    }
+
+    if (elements.btnAddBorda) {
+        elements.btnAddBorda.addEventListener('click', async () => {
+            const nomeInput = elements.inputNovaBordaNome;
+            const precoInput = elements.inputNovaBordaPreco;
+            if (!nomeInput || !nomeInput.value.trim()) return;
+
+            const nome = nomeInput.value.trim();
+            const preco = Number(precoInput.value) || 0;
+            nomeInput.value = '';
+            precoInput.value = '';
+
+            const novasBordas = [...(state.crusts || []), { id: Date.now(), nome, preco, ativo: true }];
+            await salvarBordas(novasBordas);
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // RENDER: EDITOR DE MENSAGENS DO WHATSAPP (100% CONFIGURÁVEL)
+    // ------------------------------------------------------------------
+    function renderMessagesForm() {
+        const msgs = state.messages || {};
+        if (elements.msgMenuPrincipal) elements.msgMenuPrincipal.value = msgs.menuPrincipal || '';
+        if (elements.msgFechadoAviso) elements.msgFechadoAviso.value = msgs.fechadoAviso || '';
+        if (elements.msgEscolhaCategoria) elements.msgEscolhaCategoria.value = msgs.escolhaCategoria || '';
+        if (elements.msgEscolhaCarne) elements.msgEscolhaCarne.value = msgs.escolhaCarne || '';
+        if (elements.msgEscolhaBorda) elements.msgEscolhaBorda.value = msgs.escolhaBorda || '';
+        if (elements.msgCarrinhoResumo) elements.msgCarrinhoResumo.value = msgs.carrinhoResumo || '';
+        if (elements.msgTipoEntrega) elements.msgTipoEntrega.value = msgs.tipoEntrega || '';
+        if (elements.msgSolicitarEndereco) elements.msgSolicitarEndereco.value = msgs.solicitarEndereco || '';
+        if (elements.msgFormaPagamento) elements.msgFormaPagamento.value = msgs.formaPagamento || '';
+        if (elements.msgTrocoDinheiro) elements.msgTrocoDinheiro.value = msgs.trocoDinheiro || '';
+        if (elements.msgPedidoConfirmadoCliente) elements.msgPedidoConfirmadoCliente.value = msgs.pedidoConfirmadoCliente || '';
+        if (elements.msgNotificacaoCozinha) elements.msgNotificacaoCozinha.value = msgs.notificacaoCozinha || '';
+        if (elements.msgPedidoEmPreparo) elements.msgPedidoEmPreparo.value = msgs.pedidoEmPreparo || '';
+        if (elements.msgPedidoSaiuEntrega) elements.msgPedidoSaiuEntrega.value = msgs.pedidoSaiuEntrega || '';
+        if (elements.msgPedidoProntoRetirada) elements.msgPedidoProntoRetirada.value = msgs.pedidoProntoRetirada || '';
+        if (elements.msgPedidoConcluido) elements.msgPedidoConcluido.value = msgs.pedidoConcluido || '';
+        if (elements.msgPedidoCancelado) elements.msgPedidoCancelado.value = msgs.pedidoCancelado || '';
+        if (elements.msgInfoRestaurante) elements.msgInfoRestaurante.value = msgs.infoRestaurante || '';
+    }
+
+    async function salvarMensagens() {
+        const payload = {
+            menuPrincipal: elements.msgMenuPrincipal.value,
+            fechadoAviso: elements.msgFechadoAviso.value,
+            escolhaCategoria: elements.msgEscolhaCategoria.value,
+            escolhaCarne: elements.msgEscolhaCarne.value,
+            escolhaBorda: elements.msgEscolhaBorda.value,
+            carrinhoResumo: elements.msgCarrinhoResumo.value,
+            tipoEntrega: elements.msgTipoEntrega.value,
+            solicitarEndereco: elements.msgSolicitarEndereco.value,
+            formaPagamento: elements.msgFormaPagamento.value,
+            trocoDinheiro: elements.msgTrocoDinheiro.value,
+            pedidoConfirmadoCliente: elements.msgPedidoConfirmadoCliente.value,
+            notificacaoCozinha: elements.msgNotificacaoCozinha.value,
+            pedidoEmPreparo: elements.msgPedidoEmPreparo.value,
+            pedidoSaiuEntrega: elements.msgPedidoSaiuEntrega.value,
+            pedidoProntoRetirada: elements.msgPedidoProntoRetirada.value,
+            pedidoConcluido: elements.msgPedidoConcluido.value,
+            pedidoCancelado: elements.msgPedidoCancelado.value,
+            infoRestaurante: elements.msgInfoRestaurante.value
+        };
+
+        try {
+            const res = await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                state.messages = payload;
+                showToast('Todas as mensagens do WhatsApp foram salvas com sucesso!', 'success');
+            }
+        } catch (e) {
+            showToast('Erro ao salvar mensagens.', 'error');
+        }
+    }
+
+    if (elements.formMensagensBot) {
+        elements.formMensagensBot.addEventListener('submit', (e) => {
+            e.preventDefault();
+            salvarMensagens();
+        });
+    }
+    if (elements.btnSaveAllMessages) {
+        elements.btnSaveAllMessages.addEventListener('click', salvarMensagens);
+    }
+
+    if (elements.btnRestoreDefaultMessages) {
+        elements.btnRestoreDefaultMessages.addEventListener('click', async () => {
+            if (confirm('Deseja restaurar todas as mensagens para o modelo padrão original?')) {
+                await fetchMessages();
+                showToast('Mensagens restauradas para o padrão!', 'info');
+            }
+        });
+    }
+
     function populateModalSelect() {
         if (!elements.modalServico) return;
         elements.modalServico.innerHTML = state.menu.map(it => {
@@ -729,7 +1110,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         input.value = '';
 
-        // Adiciona bolha do usuário
         const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         const userBubble = document.createElement('div');
         userBubble.className = 'chat-bubble outgoing';
@@ -839,7 +1219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Modal de Novo Pedido
+    // Modal Pedido Manual Balcão
     if (elements.btnModalNovoAgendamento) {
         elements.btnModalNovoAgendamento.addEventListener('click', () => {
             if (elements.modalAgendamento) elements.modalAgendamento.classList.remove('hidden');

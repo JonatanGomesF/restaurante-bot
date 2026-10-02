@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurante Bom Sabor &mdash; Marmitex & Pizzaria WhatsApp Hub</title>
-    <meta name="description" content="Sistema inteligente de pedidos e delivery para Restaurante Bom Sabor via WhatsApp. Marmitex de dia e Pizzas à noite com gestão em tempo real.">
+    <title>Painel Administrativo &mdash; Restaurante Bom Sabor</title>
+    <meta name="description" content="Painel Administrativo 100% configurável para Restaurante Bom Sabor. Personalize mensagens do WhatsApp, cardápio, carnes, bordas e pedidos.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,7 +32,7 @@
                     <div class="logo-icon">🍽️</div>
                     <div class="brand-info">
                         <h2 id="sidebar-salon-name">Restaurante Bom Sabor</h2>
-                        <span class="badge-pro">Delivery & WhatsApp PRO</span>
+                        <span class="badge-pro">Painel Administrativo</span>
                     </div>
                 </div>
             </div>
@@ -61,23 +61,32 @@
                     <i data-lucide="receipt"></i>
                     <span>Histórico de Pedidos</span>
                 </button>
-                <button class="nav-btn" data-tab="tab-simulator" id="nav-simulator">
-                    <i data-lucide="message-square"></i>
-                    <span>Simulador & Logs</span>
-                    <span class="nav-badge live">LIVE</span>
+                <button class="nav-btn" data-tab="tab-menu-manager" id="nav-menu-manager">
+                    <i data-lucide="utensils"></i>
+                    <span>Cardápio, Carnes & Bordas</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-messages-manager" id="nav-messages-manager">
+                    <i data-lucide="message-square-code"></i>
+                    <span>Mensagens do WhatsApp</span>
+                    <span class="nav-badge config-badge">100% Editável</span>
                 </button>
                 <button class="nav-btn" data-tab="tab-settings" id="nav-settings">
-                    <i data-lucide="utensils"></i>
-                    <span>Cardápio & Restaurante</span>
+                    <i data-lucide="sliders"></i>
+                    <span>Configurações Gerais</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-simulator" id="nav-simulator">
+                    <i data-lucide="smartphone"></i>
+                    <span>Simulador & Logs</span>
+                    <span class="nav-badge live">LIVE</span>
                 </button>
             </nav>
 
             <div class="sidebar-footer">
                 <div class="anti-conflict-badge">
-                    <i data-lucide="truck"></i>
+                    <i data-lucide="check-circle-2"></i>
                     <div>
-                        <strong>Marmitex & Pizzaria</strong>
-                        <small id="footer-shift-status">Turno Almoço & Jantar</small>
+                        <strong>Sistema Customizável</strong>
+                        <small>Textos e cardápio dinâmicos</small>
                     </div>
                 </div>
             </div>
@@ -147,7 +156,6 @@
             <!-- TAB 1: QR CODE & CONEXÃO WHATSAPP -->
             <section class="tab-content active" id="tab-qrcode">
                 <div class="qrcode-view-grid">
-                    <!-- QR Code Card -->
                     <div class="glass-card qrcode-main-card">
                         <div class="card-header">
                             <div class="header-icon"><i data-lucide="smartphone"></i></div>
@@ -183,7 +191,7 @@
                                 <i data-lucide="chef-hat"></i>
                             </div>
                             <h3>WhatsApp do Restaurante Conectado!</h3>
-                            <p>O bot está ativo recebendo pedidos de Marmitex e Pizza automaticamente.</p>
+                            <p>O bot está ativo recebendo pedidos e enviando as mensagens configuradas por você.</p>
 
                             <div class="connected-details-box">
                                 <div class="detail-item">
@@ -214,7 +222,6 @@
                             </div>
                         </div>
 
-                        <!-- Action controls -->
                         <div class="card-footer-actions">
                             <button class="btn btn-secondary" id="btn-manual-refresh-qr">
                                 <i data-lucide="refresh-cw"></i> Recarregar QR Code
@@ -222,16 +229,15 @@
                         </div>
                     </div>
 
-                    <!-- Step-by-Step Tutorial & Safety Info -->
                     <div class="qrcode-side-panel">
                         <div class="glass-card instructions-card">
-                            <h3><i data-lucide="help-circle"></i> Conecte seu WhatsApp em 4 Passos</h3>
+                            <h3><i data-lucide="help-circle"></i> Conecte em 4 Passos</h3>
                             <ol class="step-list">
                                 <li>
                                     <div class="step-num">1</div>
                                     <div class="step-desc">
                                         <strong>Abra o WhatsApp no Celular</strong>
-                                        <p>Abra o WhatsApp no smartphone do restaurante.</p>
+                                        <p>Abra o app no smartphone do restaurante.</p>
                                     </div>
                                 </li>
                                 <li>
@@ -252,7 +258,7 @@
                                     <div class="step-num">4</div>
                                     <div class="step-desc">
                                         <strong>Aponte a Câmera</strong>
-                                        <p>Escaneie o QR Code ao lado para iniciar as vendas automáticas!</p>
+                                        <p>Escaneie o QR Code para ativar as vendas automáticas!</p>
                                     </div>
                                 </li>
                             </ol>
@@ -260,34 +266,30 @@
 
                         <div class="glass-card collision-card">
                             <div class="shield-header">
-                                <i data-lucide="zap"></i>
-                                <h4>Cardápio Inteligente Dia & Noite</h4>
+                                <i data-lucide="sliders"></i>
+                                <h4>100% Gerenciável pelo Dono</h4>
                             </div>
-                            <p>☀️ <strong>De Dia (Almoço):</strong> O bot oferece marmitex com opções de carnes e guarnições fresquinhas.</p>
-                            <p>🌙 <strong>À Noite (Jantar):</strong> O bot foca em pizzas artesanais de forno e refrigerantes gelados.</p>
-                            <p class="highlight-text">🛵 O cliente monta o pedido no WhatsApp, escolhe Delivery ou Retirada, informa a forma de pagamento e a comanda cai direto aqui no painel!</p>
+                            <p>Todos os textos enviados aos clientes, cardápio, opções de carnes e bordas recheadas agora podem ser editados nas abas ao lado!</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- TAB 2: COZINHA & PEDIDOS AO VIVO (KANBAN / FEED) -->
+            <!-- TAB 2: COZINHA & PEDIDOS AO VIVO -->
             <section class="tab-content" id="tab-calendar">
                 <div class="calendar-header-bar">
                     <div class="date-navigator">
-                        <button class="btn btn-secondary btn-icon" id="btn-prev-day"><i data-lucide="chevron-left"></i></button>
                         <div class="current-date-display">
-                            <h2 id="calendar-selected-date-label">Hoje, Pedidos ao Vivo</h2>
-                            <span id="calendar-selected-date-sub">Restaurante Bom Sabor</span>
+                            <h2 id="calendar-selected-date-label">Cozinha & Pedidos ao Vivo</h2>
+                            <span id="calendar-selected-date-sub">Acompanhe e despache pedidos em tempo real</span>
                         </div>
-                        <button class="btn btn-secondary btn-icon" id="btn-next-day"><i data-lucide="chevron-right"></i></button>
                     </div>
 
                     <div class="calendar-legend">
                         <span class="legend-item"><span class="dot available"></span> Pendente</span>
                         <span class="legend-item"><span class="dot occupied"></span> Em Preparo</span>
                         <span class="legend-item"><span class="dot delivery-dot"></span> Saiu para Entrega</span>
-                        <span class="legend-item"><span class="dot locked"></span> Entregue / Concluído</span>
+                        <span class="legend-item"><span class="dot locked"></span> Entregue</span>
                     </div>
                 </div>
 
@@ -297,13 +299,12 @@
                         <div class="closed-banner-icon"><i data-lucide="alert-octagon"></i></div>
                         <div>
                             <h4>🛑 RESTAURANTE FECHADO HOJE</h4>
-                            <p id="calendar-closed-reason">Atendimento pausado pelo administrador. Clientes no WhatsApp estão sendo orientados sobre o recesso.</p>
+                            <p id="calendar-closed-reason">Atendimento pausado pelo administrador.</p>
                         </div>
                     </div>
                     <button class="btn btn-secondary btn-sm" id="btn-quick-reopen">Reabrir Restaurante</button>
                 </div>
 
-                <!-- Live Orders Container -->
                 <div class="orders-live-container" id="slots-grid-container">
                     <!-- Dynamic live orders cards rendered via JS -->
                 </div>
@@ -353,64 +354,237 @@
                 </div>
             </section>
 
-            <!-- TAB 4: SIMULADOR DE WHATSAPP & LIVE LOGS -->
-            <section class="tab-content" id="tab-simulator">
-                <div class="simulator-layout">
-                    <!-- Phone simulator frame -->
-                    <div class="phone-mockup">
-                        <div class="phone-notch"></div>
-                        <div class="phone-screen">
-                            <div class="whatsapp-chat-header">
-                                <div class="chat-avatar">🍽️</div>
-                                <div class="chat-info">
-                                    <strong id="sim-barber-title">Restaurante Bom Sabor</strong>
-                                    <span class="chat-status">online (Atendente Virtual)</span>
+            <!-- TAB 4: GESTOR DE CARDÁPIO, CARNES & BORDAS -->
+            <section class="tab-content" id="tab-menu-manager">
+                <div class="settings-grid">
+                    <!-- Itens do Cardápio -->
+                    <div class="glass-card" style="grid-column: 1 / -1;">
+                        <div class="card-header" style="justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div class="header-icon"><i data-lucide="utensils"></i></div>
+                                <div>
+                                    <h2>Itens do Cardápio</h2>
+                                    <p>Adicione, altere preços, descrições e ative/desative pratos e pizzas</p>
                                 </div>
                             </div>
-                            <div class="whatsapp-messages-body" id="sim-messages-body">
-                                <div class="chat-bubble incoming">
-                                    <div class="bubble-text">
-                                        🍽️ <strong>BEM-VINDO AO RESTAURANTE BOM SABOR</strong><br><br>
-                                        Olá! O que você gostaria de saborear hoje?<br><br>
-                                        ⏰ <em>Almoço: Marmitex fresquinhas (11h às 15h)</em><br>
-                                        🍕 <em>Noite: Pizzas artesanais (18h às 23h30)</em><br><br>
-                                        1️⃣ <strong>Fazer Pedido</strong> 🛒<br>
-                                        2️⃣ <strong>Ver Cardápio Completo</strong> 📋<br>
-                                        3️⃣ <strong>Acompanhar Meu Pedido</strong> 🛵<br>
-                                        4️⃣ <strong>Horários, Endereço & Pagamento</strong> 📍<br><br>
-                                        <em>Envie 1 para pedir agora!</em>
-                                    </div>
-                                    <span class="bubble-time">12:00</span>
-                                </div>
+                            <button class="btn btn-primary" id="btn-modal-novo-item">
+                                <i data-lucide="plus"></i> Adicionar Prato / Item
+                            </button>
+                        </div>
+
+                        <div class="menu-tabs-row" style="display: flex; gap: 10px; margin-bottom: 16px;">
+                            <button type="button" class="btn btn-secondary btn-sm active" id="btn-filter-marmitex">🍱 Marmitex (Dia)</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-filter-pizza">🍕 Pizzas (Noite)</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-filter-bebidas">🥤 Bebidas & Extras</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-filter-todos">📋 Todos os Itens</button>
+                        </div>
+
+                        <div class="services-list" id="services-list-container">
+                            <!-- Dynamic menu items rendered via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Opções de Carnes para Marmitex -->
+                    <div class="glass-card">
+                        <div class="card-header">
+                            <div class="header-icon"><i data-lucide="drumstick"></i></div>
+                            <div>
+                                <h2>Carnes & Guarnições (Marmitex)</h2>
+                                <p>Opções oferecidas ao cliente ao escolher marmitex</p>
                             </div>
-                            <div class="whatsapp-input-bar">
-                                <input type="text" id="sim-input" placeholder="Digite uma mensagem (ex: 1, pedir marmita, pizza)..." autocomplete="off">
-                                <button id="btn-sim-send"><i data-lucide="send"></i></button>
+                        </div>
+                        <div class="form-body">
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="input-nova-carne" class="form-input" placeholder="Ex: 🥩 Picanha Grelhada na Chapa" style="flex: 1;">
+                                <button type="button" class="btn btn-secondary" id="btn-add-carne">
+                                    <i data-lucide="plus"></i> Adicionar
+                                </button>
+                            </div>
+                            <div id="lista-carnes-container" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                <!-- Dynamic meats list -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Live bot event logs stream -->
-                    <div class="glass-card live-logs-card">
+                    <!-- Opções de Bordas para Pizzas -->
+                    <div class="glass-card">
                         <div class="card-header">
-                            <div class="header-icon"><i data-lucide="terminal"></i></div>
+                            <div class="header-icon"><i data-lucide="pizza"></i></div>
                             <div>
-                                <h2>Monitor de Eventos em Tempo Real</h2>
-                                <p>Registro instantâneo de pedidos, mensagens recebidas e notificações</p>
+                                <h2>Bordas Recheadas (Pizzas)</h2>
+                                <p>Opções e valores adicionais para pizzas</p>
                             </div>
-                            <button class="btn btn-secondary btn-sm" id="btn-clear-logs">Limpar</button>
                         </div>
-                        <div class="logs-console" id="logs-console">
-                            <div class="log-entry system">
-                                <span class="log-time">[Sistema]</span>
-                                <span class="log-text">Central de pedidos Restaurante Bom Sabor iniciada com sucesso.</span>
+                        <div class="form-body">
+                            <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px;">
+                                <input type="text" id="input-nova-borda-nome" class="form-input" placeholder="Ex: Borda de Nutella">
+                                <input type="number" step="0.50" id="input-nova-borda-preco" class="form-input" placeholder="R$ 10.00">
+                                <button type="button" class="btn btn-secondary" id="btn-add-borda">
+                                    <i data-lucide="plus"></i> Adicionar
+                                </button>
+                            </div>
+                            <div id="lista-bordas-container" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                                <!-- Dynamic crusts list -->
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- TAB 5: CARDÁPIO & CONFIGURAÇÕES -->
+            <!-- TAB 5: GESTOR DE MENSAGENS E TEXTOS DO WHATSAPP (100% CONFIGURÁVEL) -->
+            <section class="tab-content" id="tab-messages-manager">
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <div class="card-header" style="justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <div class="header-icon"><i data-lucide="message-square-code"></i></div>
+                            <div>
+                                <h2>Editor de Mensagens & Respostas Automáticas</h2>
+                                <p>Personalize cada frase e menu que o bot envia para o cliente no WhatsApp</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="btn-save-all-messages">
+                            <i data-lucide="save"></i> Salvar Todas as Mensagens
+                        </button>
+                    </div>
+
+                    <div style="background: var(--bg-surface-elevated); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
+                        <strong style="color: var(--neon-amber); font-size: 0.88rem;">💡 Tags Dinâmicas Disponíveis:</strong>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+                            Você pode usar estas variáveis dentro dos textos. O bot preencherá os dados reais automaticamente:<br>
+                            <code>{nome}</code> <code>{restaurante}</code> <code>{codigo}</code> <code>{total}</code> <code>{subtotal}</code> <code>{taxa}</code> <code>{pix}</code> <code>{endereco}</code> <code>{tempo}</code> <code>{itens}</code> <code>{formaPagamento}</code>
+                        </p>
+                    </div>
+
+                    <form id="form-mensagens-bot" class="form-body">
+                        <!-- Mensagem 1: Boas-vindas / Menu Principal -->
+                        <div class="form-group">
+                            <label for="msg-menuPrincipal">1. Mensagem de Boas-Vindas & Menu Principal</label>
+                            <textarea id="msg-menuPrincipal" class="form-input form-textarea" rows="7"></textarea>
+                            <small>Enviada quando o cliente inicia a conversa ou manda "Menu", "Oi", etc.</small>
+                        </div>
+
+                        <!-- Mensagem 2: Aviso Fechado Hoje -->
+                        <div class="form-group">
+                            <label for="msg-fechadoAviso">2. Aviso de Restaurante Fechado Hoje</label>
+                            <input type="text" id="msg-fechadoAviso" class="form-input">
+                            <small>Exibido dentro do menu quando o modo fechado estiver ligado. Use <code>{motivo}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 3: Escolha de Categoria -->
+                        <div class="form-group">
+                            <label for="msg-escolhaCategoria">3. Mensagem de Escolha de Categoria</label>
+                            <textarea id="msg-escolhaCategoria" class="form-input form-textarea" rows="4"></textarea>
+                            <small>Use <code>{restaurante}</code> e <code>{listaCategorias}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 4: Escolha de Carne para Marmitex -->
+                        <div class="form-group">
+                            <label for="msg-escolhaCarne">4. Pergunta de Carne / Guarnição para Marmitex</label>
+                            <textarea id="msg-escolhaCarne" class="form-input form-textarea" rows="5"></textarea>
+                            <small>Use <code>{item}</code>, <code>{preco}</code> e <code>{listaCarnes}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 5: Pergunta de Borda para Pizza -->
+                        <div class="form-group">
+                            <label for="msg-escolhaBorda">5. Pergunta de Borda Recheada para Pizza</label>
+                            <textarea id="msg-escolhaBorda" class="form-input form-textarea" rows="5"></textarea>
+                            <small>Use <code>{item}</code>, <code>{preco}</code> e <code>{listaBordas}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 6: Resumo do Carrinho -->
+                        <div class="form-group">
+                            <label for="msg-carrinhoResumo">6. Resumo do Carrinho (Continuar ou Finalizar)</label>
+                            <textarea id="msg-carrinhoResumo" class="form-input form-textarea" rows="6"></textarea>
+                            <small>Use <code>{resumoCarrinho}</code> e <code>{subtotal}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 7: Tipo de Entrega -->
+                        <div class="form-group">
+                            <label for="msg-tipoEntrega">7. Pergunta de Delivery ou Retirada</label>
+                            <textarea id="msg-tipoEntrega" class="form-input form-textarea" rows="4"></textarea>
+                            <small>Use <code>{taxa}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 8: Solicitação de Endereço -->
+                        <div class="form-group">
+                            <label for="msg-solicitarEndereco">8. Solicitação do Endereço de Entrega</label>
+                            <textarea id="msg-solicitarEndereco" class="form-input form-textarea" rows="3"></textarea>
+                        </div>
+
+                        <!-- Mensagem 9: Escolha de Pagamento -->
+                        <div class="form-group">
+                            <label for="msg-formaPagamento">9. Pergunta da Forma de Pagamento (PIX, Cartão, Dinheiro)</label>
+                            <textarea id="msg-formaPagamento" class="form-input form-textarea" rows="5"></textarea>
+                            <small>Use <code>{endereco}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 10: Pergunta de Troco -->
+                        <div class="form-group">
+                            <label for="msg-trocoDinheiro">10. Pergunta de Troco para Pagamento em Dinheiro</label>
+                            <textarea id="msg-trocoDinheiro" class="form-input form-textarea" rows="3"></textarea>
+                        </div>
+
+                        <!-- Mensagem 11: Confirmação VIP do Pedido para o Cliente -->
+                        <div class="form-group">
+                            <label for="msg-pedidoConfirmadoCliente">11. Mensagem de Confirmação do Pedido (Cliente)</label>
+                            <textarea id="msg-pedidoConfirmadoCliente" class="form-input form-textarea" rows="10"></textarea>
+                            <small>Use <code>{codigo}</code>, <code>{nome}</code>, <code>{localEntrega}</code>, <code>{itens}</code>, <code>{total}</code>, <code>{tempo}</code>, <code>{pixInfo}</code>.</small>
+                        </div>
+
+                        <!-- Mensagem 12: Comanda Enviada para a Cozinha / Dono -->
+                        <div class="form-group">
+                            <label for="msg-notificacaoCozinha">12. Comanda Enviada para a Cozinha / Dono</label>
+                            <textarea id="msg-notificacaoCozinha" class="form-input form-textarea" rows="8"></textarea>
+                            <small>Enviada para o WhatsApp configurado nas Configurações Gerais.</small>
+                        </div>
+
+                        <!-- Mensagem 13: Avisos de Mudança de Status -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="msg-pedidoEmPreparo">13.1 Aviso: Pedido em Preparo</label>
+                                <input type="text" id="msg-pedidoEmPreparo" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="msg-pedidoSaiuEntrega">13.2 Aviso: Pedido Saiu para Entrega</label>
+                                <input type="text" id="msg-pedidoSaiuEntrega" class="form-input">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="msg-pedidoProntoRetirada">13.3 Aviso: Pronto para Retirada</label>
+                                <input type="text" id="msg-pedidoProntoRetirada" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="msg-pedidoConcluido">13.4 Aviso: Pedido Entregue / Concluído</label>
+                                <input type="text" id="msg-pedidoConcluido" class="form-input">
+                            </div>
+                        </div>
+
+                        <!-- Mensagem 14: Cancelamento de Pedido -->
+                        <div class="form-group">
+                            <label for="msg-pedidoCancelado">14. Mensagem de Cancelamento de Pedido</label>
+                            <textarea id="msg-pedidoCancelado" class="form-input form-textarea" rows="3"></textarea>
+                        </div>
+
+                        <!-- Mensagem 15: Informações & Horários -->
+                        <div class="form-group">
+                            <label for="msg-infoRestaurante">15. Mensagem de Informações & Horários do Restaurante</label>
+                            <textarea id="msg-infoRestaurante" class="form-input form-textarea" rows="7"></textarea>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                            <button type="button" class="btn btn-secondary" id="btn-restore-default-messages">
+                                <i data-lucide="rotate-ccw"></i> Restaurar Padrões Originais
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i data-lucide="save"></i> Salvar Mensagens do WhatsApp
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 6: CONFIGURAÇÕES GERAIS -->
             <section class="tab-content" id="tab-settings">
                 <div class="settings-grid">
                     <!-- CARD 1: CONTROLE DE FUNCIONAMENTO (HOJE ESTAMOS FECHADOS) -->
@@ -450,14 +624,14 @@
                         <div class="card-header">
                             <div class="header-icon"><i data-lucide="store"></i></div>
                             <div>
-                                <h2>Dados do Restaurante</h2>
-                                <p>Informações comerciais enviadas aos clientes</p>
+                                <h2>Dados do Estabelecimento</h2>
+                                <p>Informações comerciais enviadas nas mensagens automáticas</p>
                             </div>
                         </div>
                         <form id="form-config-geral" class="form-body">
                             <div class="form-group">
                                 <label for="cfg-nome">Nome do Restaurante</label>
-                                <input type="text" id="cfg-nome" class="form-input" value="Restaurante Bom Sabor" required>
+                                <input type="text" id="cfg-nome" class="form-input" required>
                             </div>
                             <div class="form-group">
                                 <label for="cfg-dono">WhatsApp da Cozinha / Dono (com DDI e DDD)</label>
@@ -489,36 +663,135 @@
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">
-                                <i data-lucide="save"></i> Salvar Informações
+                                <i data-lucide="save"></i> Salvar Configurações
                             </button>
                         </form>
                     </div>
 
-                    <!-- CARD 3: Gestão do Cardápio (Marmitex, Pizzas e Bebidas) -->
-                    <div class="glass-card" style="grid-column: 1 / -1;">
+                    <!-- CARD 3: Informações do Sistema -->
+                    <div class="glass-card">
                         <div class="card-header">
-                            <div class="header-icon"><i data-lucide="menu"></i></div>
+                            <div class="header-icon"><i data-lucide="shield-check"></i></div>
                             <div>
-                                <h2>Gestão do Cardápio (Marmitex, Pizzas & Bebidas)</h2>
-                                <p>Itens disponíveis para pedidos imediatos no WhatsApp</p>
+                                <h2>Segurança & Banco de Dados</h2>
+                                <p>Isolamento garantido para o banco de dados</p>
                             </div>
                         </div>
-                        <div class="menu-tabs-row" style="display: flex; gap: 10px; margin-bottom: 16px;">
-                            <button type="button" class="btn btn-secondary btn-sm active" id="btn-filter-marmitex">🍱 Marmitex (Dia)</button>
-                            <button type="button" class="btn btn-secondary btn-sm" id="btn-filter-pizza">🍕 Pizzas (Noite)</button>
-                            <button type="button" class="btn btn-secondary btn-sm" id="btn-filter-bebidas">🥤 Bebidas & Extras</button>
-                            <button type="button" class="btn btn-secondary btn-sm" id="btn-filter-todos">📋 Todos os Itens</button>
+                        <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+                            <p>🛡️ <strong>Multi-Tenant Ativo:</strong> Os dados deste restaurante estão isolados com o identificador exclusivo <code>restaurante_principal</code>.</p>
+                            <p style="margin-top: 8px;">💾 <strong>Persistência Dupla:</strong> Backup em tempo real em <code>agendamentos.json</code> local e na nuvem do Supabase.</p>
                         </div>
-                        <div class="services-list" id="services-list-container">
-                            <!-- Dynamic menu items rendered via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 7: SIMULADOR DE WHATSAPP & LIVE LOGS -->
+            <section class="tab-content" id="tab-simulator">
+                <div class="simulator-layout">
+                    <div class="phone-mockup">
+                        <div class="phone-notch"></div>
+                        <div class="phone-screen">
+                            <div class="whatsapp-chat-header">
+                                <div class="chat-avatar">🍽️</div>
+                                <div class="chat-info">
+                                    <strong id="sim-barber-title">Restaurante Bom Sabor</strong>
+                                    <span class="chat-status">online (Atendente Virtual)</span>
+                                </div>
+                            </div>
+                            <div class="whatsapp-messages-body" id="sim-messages-body">
+                                <div class="chat-bubble incoming">
+                                    <div class="bubble-text">
+                                        🍽️ <strong>BEM-VINDO AO RESTAURANTE BOM SABOR</strong><br><br>
+                                        Olá! O que você gostaria de saborear hoje?<br><br>
+                                        1️⃣ <strong>Fazer Pedido</strong> 🛒<br>
+                                        2️⃣ <strong>Ver Cardápio Completo</strong> 📋<br>
+                                        3️⃣ <strong>Acompanhar Meu Pedido</strong> 🛵<br>
+                                        4️⃣ <strong>Horários & Endereço</strong> 📍<br><br>
+                                        <em>Envie 1 para pedir agora!</em>
+                                    </div>
+                                    <span class="bubble-time">12:00</span>
+                                </div>
+                            </div>
+                            <div class="whatsapp-input-bar">
+                                <input type="text" id="sim-input" placeholder="Digite uma mensagem (ex: 1, pedir marmita, pizza)..." autocomplete="off">
+                                <button id="btn-sim-send"><i data-lucide="send"></i></button>
+                            </div>
                         </div>
-                        <button class="btn btn-secondary" id="btn-add-service" style="margin-top: 16px;">
-                            <i data-lucide="plus-circle"></i> Adicionar Item ao Cardápio
-                        </button>
+                    </div>
+
+                    <div class="glass-card live-logs-card">
+                        <div class="card-header">
+                            <div class="header-icon"><i data-lucide="terminal"></i></div>
+                            <div>
+                                <h2>Monitor de Eventos em Tempo Real</h2>
+                                <p>Registro instantâneo de pedidos, mensagens recebidas e notificações</p>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" id="btn-clear-logs">Limpar</button>
+                        </div>
+                        <div class="logs-console" id="logs-console">
+                            <div class="log-entry system">
+                                <span class="log-time">[Sistema]</span>
+                                <span class="log-text">Central de pedidos e bot configurável inicializados.</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- MODAL: ADICIONAR / EDITAR ITEM DO CARDÁPIO -->
+    <div class="modal-overlay hidden" id="modal-item-cardapio">
+        <div class="glass-card modal-box">
+            <div class="modal-header">
+                <h3 id="modal-item-title"><i data-lucide="plus-circle"></i> Item do Cardápio</h3>
+                <button class="modal-close" id="btn-close-modal-item">&times;</button>
+            </div>
+            <form id="form-item-cardapio" class="form-body">
+                <input type="hidden" id="modal-item-id" value="">
+                <div class="form-group">
+                    <label for="modal-item-nome">Nome do Prato / Pizza / Bebida</label>
+                    <input type="text" id="modal-item-nome" class="form-input" placeholder="Ex: Marmitex Executiva Especial" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modal-item-categoria">Categoria</label>
+                        <select id="modal-item-categoria" class="form-select">
+                            <option value="marmitex">🍱 Marmitex</option>
+                            <option value="pizza">🍕 Pizza</option>
+                            <option value="bebida">🥤 Bebida</option>
+                            <option value="extra">🍟 Extra / Porção</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-item-preco">Preço (R$)</label>
+                        <input type="number" step="0.50" id="modal-item-preco" class="form-input" placeholder="25.00" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modal-item-turno">Disponibilidade (Turno)</label>
+                        <select id="modal-item-turno" class="form-select">
+                            <option value="dia">☀️ Almoço (Dia)</option>
+                            <option value="noite">🌙 Jantar (Noite)</option>
+                            <option value="todos">⭐ Todos os Horários</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-item-icone">Emoji / Ícone</label>
+                        <input type="text" id="modal-item-icone" class="form-input" value="🍽️">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="modal-item-descricao">Descrição Detalhada / Ingredientes</label>
+                    <textarea id="modal-item-descricao" class="form-input form-textarea" rows="3" placeholder="Arroz, feijão, filé grelhado, salada e fritas..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-modal-item">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btn-salvar-modal-item">Salvar Item</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- MODAL: NOVO PEDIDO BALCÃO / MANUAL -->
