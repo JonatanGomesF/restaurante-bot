@@ -49,8 +49,8 @@ function obterVersaoLocal() {
     } catch (e) {}
 
     return {
-        version: "1.0.0",
-        githubRepo: "jonatan/botsalaorev",
+        version: "1.0.1",
+        githubRepo: "JonatanGomesF/restaurante-bot",
         branch: "main",
         filesToSync: [
             "public/index.html",
@@ -61,7 +61,7 @@ function obterVersaoLocal() {
 }
 
 function limparRepo(urlOuNome) {
-    if (!urlOuNome) return 'JonatanGomesF/barbearia-bot';
+    if (!urlOuNome) return 'JonatanGomesF/restaurante-bot';
     return urlOuNome
         .replace(/^https?:\/\/github\.com\//i, '')
         .replace(/\.git$/i, '')

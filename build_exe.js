@@ -4,7 +4,7 @@ const { execSync } = require('child_process');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 
 console.log(`\n=====================================================================`);
-console.log(`       💈 GERADOR DE EXECUTÁVEL PROTEGIDO — BARBEARIA BOT 💈`);
+console.log(` 🍽️  GERADOR DE EXECUTÁVEL PROTEGIDO — RESTAURANTE DELIVERY BOT 🍕`);
 console.log(`=====================================================================\n`);
 
 const ROOT_DIR = __dirname;
@@ -14,7 +14,7 @@ const DIST_DIR = path.join(ROOT_DIR, 'dist');
 // 1. Limpeza de processos e pastas temporárias de build
 console.log(`🧹 [1/5] Limpando processos e pastas temporárias de build...`);
 try {
-    execSync('taskkill /F /IM BarbeariaBot.exe /T 2>nul || exit 0', { shell: 'cmd.exe' });
+    execSync('taskkill /F /IM RestauranteBot.exe /T 2>nul || taskkill /F /IM BarbeariaBot.exe /T 2>nul || exit 0', { shell: 'cmd.exe' });
 } catch (e) {}
 
 if (fs.existsSync(STAGING_DIR)) {
@@ -105,7 +105,7 @@ fs.copyFileSync(path.join(ROOT_DIR, 'package.json'), path.join(STAGING_DIR, 'pac
 console.log(`⚙️  [4/5] Empacotando em arquivo executável .EXE nativo do Windows...`);
 
 const entryFile = path.join(STAGING_DIR, 'chatbot.js');
-const outputExe = path.join(DIST_DIR, 'BarbeariaBot.exe');
+const outputExe = path.join(DIST_DIR, 'RestauranteBot.exe');
 
 const pkgBinPath = path.join(ROOT_DIR, 'node_modules', '.bin', 'pkg');
 const pkgCmd = `"${pkgBinPath}" "${entryFile}" --target host --output "${outputExe}" --public`;
@@ -118,19 +118,19 @@ try {
 }
 
 // 5. Criação do arquivo de inicialização simplificado na pasta dist
-console.log(`📝 [5/5] Finalizando pacote de distribuição para o cliente...`);
+console.log(`📝 [5/5] Finalizando pacote de distribuição para o restaurante...`);
 
 const batLauncher = `@echo off
-title Barbearia Bot & Painel de Agendamentos
+title Restaurante Bom Sabor & WhatsApp Delivery Hub
 cd /d "%~dp0"
 cls
 echo =====================================================================
-echo       💈 INICIANDO BARBEARIA BOT & PAINEL DE AGENDAMENTOS 💈
+echo    🍽️  INICIANDO RESTAURANTE BOM SABOR & WHATSAPP DELIVERY HUB 🍕
 echo =====================================================================
 echo.
 echo [1/2] Verificando integridade dos arquivos...
-if not exist "BarbeariaBot.exe" (
-    echo [ERRO FATAL] BarbeariaBot.exe nao foi encontrado nesta pasta!
+if not exist "RestauranteBot.exe" (
+    echo [ERRO FATAL] RestauranteBot.exe nao foi encontrado nesta pasta!
     echo Certifique-se de copiar a pasta 'dist' completa.
     echo.
     pause
@@ -141,11 +141,11 @@ echo [2/2] Abrindo servidor local e WhatsApp Bot...
 echo.
 echo =====================================================================
 echo O painel web abrira automaticamente em: http://localhost:3000
-echo Mantenha esta janela aberta enquanto o sistema estiver em uso.
+echo Mantenha esta janela aberta enquanto o delivery estiver funcionando.
 echo =====================================================================
 echo.
 
-BarbeariaBot.exe
+RestauranteBot.exe
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -158,28 +158,36 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 pause
 `;
-fs.writeFileSync(path.join(DIST_DIR, 'INICIAR_BARBEARIA.bat'), batLauncher, 'utf8');
+fs.writeFileSync(path.join(DIST_DIR, 'INICIAR_RESTAURANTE.bat'), batLauncher, 'utf8');
 
 const leiaMeTxt = `=====================================================================
-💈 BARBEARIA BOT & PAINEL DE AGENDAMENTOS — GUIA DE INSTALAÇÃO 💈
+🍽️ RESTAURANTE BOM SABOR & WHATSAPP DELIVERY HUB — GUIA DE USO 🍕
 =====================================================================
 
-COMO USAR EM QUALQUER COMPUTADOR OU NOTEBOOK:
-1. Copie a pasta "dist" inteira para o seu computador (ou execute do pendrive).
-2. Dê 2 cliques no arquivo "INICIAR_BARBEARIA.bat" (ou "BarbeariaBot.exe").
-3. A tela preta do sistema será aberta e o navegador abrirá automaticamente em:
+COMO USAR EM QUALQUER COMPUTADOR OU NOTEBOOK NO RESTAURANTE:
+1. Copie a pasta "dist" inteira para o computador do restaurante (ou pendrive).
+2. Dê 2 cliques no arquivo "INICIAR_RESTAURANTE.bat" (ou "RestauranteBot.exe").
+3. A janela do servidor será aberta e o navegador abrirá automaticamente em:
    http://localhost:3000
-4. Escaneie o QR Code com o WhatsApp do seu estabelecimento.
-5. Pronto! O bot responderá os clientes e agendará automaticamente.
+4. Escaneie o QR Code com o WhatsApp do restaurante (ou número do delivery).
+5. Pronto! O bot responderá os clientes automaticamente:
+   - Almoço (Dia): Marmitex com opções de carne.
+   - Jantar (Noite): Pizzas inteiras ou meio a meio (cobrando maior valor), bordas e bebidas.
+   - Comanda enviada diretamente para a cozinha e pedidos ao vivo no painel!
+
+COMO PERSONALIZAR CARDÁPIO E MENSAGENS:
+- Acesse http://localhost:3000 no navegador.
+- Vá na aba "Cardápio, Carnes & Bordas" para adicionar pratos ou mudar preços.
+- Vá na aba "Mensagens do WhatsApp" para editar qualquer texto enviado pelo bot.
 
 REQUISITOS DO SISTEMA:
 - Windows 10 ou 11 (64-bit).
 - Conexão com a Internet.
 - Navegador Google Chrome ou Microsoft Edge instalado no computador.
 
-DICA:
-- Mantenha os arquivos "public", "agendamentos.json" e "config_salao.json" 
-  sempre na mesma pasta do "BarbeariaBot.exe".
+DICA IMPORTANTE:
+- Mantenha os arquivos "public", "agendamentos.json", "config_salao.json" e "version.json"
+  sempre na mesma pasta do "RestauranteBot.exe".
 =====================================================================
 `;
 fs.writeFileSync(path.join(DIST_DIR, 'LEIA_ME.txt'), leiaMeTxt, 'utf8');
@@ -189,6 +197,6 @@ fs.rmSync(STAGING_DIR, { recursive: true, force: true });
 
 console.log(`\n=====================================================================`);
 console.log(`✅ [SUCESSO] EXECUTÁVEL CRIADO COM SUCESSO NA PASTA /dist !`);
-console.log(`📦 Arquivo gerado: dist/BarbeariaBot.exe`);
-console.log(`📁 Pasta pronta para copiar no pendrive: ${DIST_DIR}`);
+console.log(`📦 Arquivo gerado: dist/RestauranteBot.exe`);
+console.log(`📁 Pasta pronta para copiar e usar no restaurante: ${DIST_DIR}`);
 console.log(`=====================================================================\n`);
