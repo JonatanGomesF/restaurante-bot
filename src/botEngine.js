@@ -132,7 +132,7 @@ async function processarMensagem({ from, nome, texto, sendMessage, sendTyping, e
             }
 
             if (!categoriaEscolhida) {
-                let listaCats = categorias.map((c, i) => `${i + 1}️⃣ ${c.icone || '🍽️'} *${c.nome}*`).join('\n');
+                let listaCats = categorias.map((c, i) => `${i + 1}. ${c.icone || '🍽️'} *${c.nome}*`).join('\n');
                 return await responder(
                     formatarTexto(mensagens.escolhaCategoria || `Por favor, escolha uma das categorias:\n\n{listaCategorias}\n\n_Ou envie *MENU* para voltar._`, {
                         restaurante: config.nomeRestaurante,
@@ -156,7 +156,7 @@ async function processarMensagem({ from, nome, texto, sendMessage, sendTyping, e
             let tituloCat = `${categoriaEscolhida.icone || '🍽️'} *${categoriaEscolhida.nome.toUpperCase()}*`;
             let listaTexto = itensCategoria.map((it, idx) => {
                 const desc = it.descricao ? `\n   _${it.descricao}_` : '';
-                return `${idx + 1}️⃣ ${it.icone || '🍽️'} *${it.nome}* — ${formatarMoeda(it.preco)}${desc}`;
+                return `${idx + 1}. ${it.icone || '🍽️'} *${it.nome}* — ${formatarMoeda(it.preco)}${desc}`;
             }).join('\n\n');
 
             return await responder(
@@ -193,7 +193,7 @@ async function processarMensagem({ from, nome, texto, sendMessage, sendTyping, e
                         carnesDisponiveis: carnes
                     });
 
-                    let carnesTexto = carnes.map((c, i) => `${i + 1}️⃣ ${c}`).join('\n');
+                    let carnesTexto = carnes.map((c, i) => `${i + 1}. ${c}`).join('\n');
 
                     return await responder(
                         formatarTexto(mensagens.escolhaCarne || `🍱 Você escolheu: *{item}* ({preco})\n\n🥩 *Escolha a opção de carne principal:*\n\n{listaCarnes}\n\n_Digite o número da carne desejada:_`, {
@@ -254,7 +254,7 @@ async function processarMensagem({ from, nome, texto, sendMessage, sendTyping, e
 
                 let listaSabores = todasPizzas.map((p, i) => {
                     const desc = p.descricao ? `\n   _${p.descricao}_` : '';
-                    return `${i + 1}️⃣ 🍕 *${p.nome}* — ${formatarMoeda(p.preco)}${desc}`;
+                    return `${i + 1}. 🍕 *${p.nome}* — ${formatarMoeda(p.preco)}${desc}`;
                 }).join('\n\n');
 
                 return await responder(
@@ -412,7 +412,7 @@ async function processarMensagem({ from, nome, texto, sendMessage, sendTyping, e
                 });
 
                 const categorias = db.getCategorias(true);
-                let listaCats = categorias.map((c, i) => `${i + 1}️⃣ ${c.icone || '🍽️'} *${c.nome}*`).join('\n');
+                let listaCats = categorias.map((c, i) => `${i + 1}. ${c.icone || '🍽️'} *${c.nome}*`).join('\n');
 
                 return await responder(
                     formatarTexto(mensagens.escolhaCategoria || `🍽️ *ESCOLHA UMA CATEGORIA:*\n\n{listaCategorias}\n\n_Digite o número desejado:_`, {
@@ -594,7 +594,7 @@ async function avancarParaBordasPizza(responder, from, estado, config, itemEmEdi
 
         let bordasTexto = bordas.map((b, i) => {
             const precoExtra = b.preco > 0 ? ` (+ ${formatarMoeda(b.preco)})` : '';
-            return `${i + 1}️⃣ *${b.nome}*${precoExtra}`;
+            return `${i + 1}. *${b.nome}*${precoExtra}`;
         }).join('\n');
 
         return await responder(
@@ -753,7 +753,7 @@ async function iniciarFluxoPedido(responder, from, config) {
     });
 
     const categorias = db.getCategorias(true);
-    let listaCats = categorias.map((c, i) => `${i + 1}️⃣ ${c.icone || '🍽️'} *${c.nome}*`).join('\n');
+    let listaCats = categorias.map((c, i) => `${i + 1}. ${c.icone || '🍽️'} *${c.nome}*`).join('\n');
 
     return await responder(
         formatarTexto(mensagens.escolhaCategoria || `🛒 *FAZER PEDIDO — {restaurante}* 🍽️\n\nEscolha a categoria desejada:\n\n{listaCategorias}\n\n_Digite o número desejado:_`, {
@@ -863,7 +863,7 @@ async function processarFluxoCancelamento(responder, from, nomeCliente, config, 
     }
 
     db.setEstadoConversa(from, { status: 'waiting_cancel_order_selection' });
-    let lista = pedidos.map((p, i) => `${i + 1}️⃣ *Pedido ${p.codigo}* — ${p.servico} (${formatarMoeda(p.total)})`).join('\n');
+    let lista = pedidos.map((p, i) => `${i + 1}. *Pedido ${p.codigo}* — ${p.servico} (${formatarMoeda(p.total)})`).join('\n');
 
     return await responder(
         `📋 *SEUS PEDIDOS ATIVOS:*\n\n` +

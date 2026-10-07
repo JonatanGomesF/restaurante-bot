@@ -1,5 +1,5 @@
 @echo off
-title Restaurante Bom Sabor - WhatsApp Delivery Bot
+title WhatsApp Delivery Bot
 chcp 65001 > nul
 color 0E
 

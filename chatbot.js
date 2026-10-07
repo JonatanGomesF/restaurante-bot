@@ -50,7 +50,7 @@ setInterval(async () => {
                     `🍱 *Total de Pedidos:* ${stats.totalGeral || stats.totalConfirmados}\n` +
                     `✅ *Pedidos Entregues:* ${stats.pedidosConcluidos || stats.totalConcluidos}\n` +
                     `💰 *Faturamento Total:* R$ ${(stats.faturamentoHoje || stats.faturamentoEstimado).toFixed(2)}\n\n` +
-                    `_Excelente trabalho a toda a equipe do Restaurante Bom Sabor!_ 🍽️🍕`
+                    `_Excelente trabalho a toda a equipe de ${config.nomeRestaurante}!_ 🍽️🍕`
                 );
             } catch (err) {
                 console.error("Erro ao enviar relatório semanal:", err.message);

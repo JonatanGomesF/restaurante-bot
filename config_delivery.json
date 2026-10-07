@@ -1,0 +1,7 @@
+{
+  "clienteId": "restaurante_bom_sabor2",
+  "nomeEstabelecimento": "Restaurante Bom Sabor2",
+  "descricao": "Configuração do cliente delivery. Altere apenas 'clienteId' e 'nomeEstabelecimento' para cada novo cliente.",
+  "githubRepo": "JonatanGomesF/restaurante-bot",
+  "branch": "main"
+}

@@ -461,7 +461,7 @@ function startServer() {
     server.listen(PORT, () => {
         console.log(`\n======================================================`);
         console.log(`🚀 [PAINEL ADMINISTRATIVO ONLINE] Acesse http://localhost:${PORT}`);
-        console.log(`🍽️ Restaurante Bom Sabor — Sistema 100% Configurável Ativo`);
+        console.log(`🍽️ ${db.getConfig().nomeRestaurante} — Sistema 100% Configurável Ativo`);
         console.log(`======================================================\n`);
         
         whatsappManager.initialize();

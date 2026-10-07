@@ -1,4 +1,4 @@
-// Restaurante Bom Sabor & WhatsApp Delivery Hub Engine (Admin 100% Configurável)
+// WhatsApp Delivery Hub Engine (Admin 100% Configurável)
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) {
         lucide.createIcons();
@@ -303,8 +303,10 @@ document.addEventListener('DOMContentLoaded', () => {
         entry.className = `log-entry ${tipo}`;
         const hora = new Date().toLocaleTimeString('pt-BR');
         entry.innerHTML = `<span class="log-time">[${hora}]</span> <span class="log-text">${escapeHtml(texto)}</span>`;
-        elements.logsConsole.appendChild(entry);
-        elements.logsConsole.scrollTop = elements.logsConsole.scrollHeight;
+        const consoleEl = elements.logsConsole;
+        const nearBottom = consoleEl.scrollHeight - consoleEl.scrollTop - consoleEl.clientHeight < 40;
+        consoleEl.appendChild(entry);
+        if (nearBottom) consoleEl.scrollTop = consoleEl.scrollHeight;
     }
 
     function escapeHtml(str) {
@@ -468,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (elements.qrContainerConnected) elements.qrContainerConnected.classList.remove('hidden');
 
             const info = data.userInfo || {};
-            if (elements.userPushname) elements.userPushname.textContent = info.pushname || 'Restaurante Bom Sabor';
+            if (elements.userPushname) elements.userPushname.textContent = info.pushname || 'Meu Delivery';
             if (elements.userPhone) elements.userPhone.textContent = info.wid ? info.wid.replace('@c.us', '') : '--';
             if (elements.userPlatform) elements.userPlatform.textContent = info.platform || 'WhatsApp Web';
         } else {
@@ -518,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyConfigToUI(cfg, fillForm = true) {
-        const nome = cfg.nomeRestaurante || 'Restaurante Bom Sabor';
+        const nome = cfg.nomeRestaurante || 'Meu Delivery';
         if (elements.sidebarSalonName) elements.sidebarSalonName.textContent = nome;
         if (elements.simBarberTitle) elements.simBarberTitle.textContent = nome;
 

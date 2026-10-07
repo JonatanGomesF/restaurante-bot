@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo &mdash; Restaurante Bom Sabor</title>
-    <meta name="description" content="Painel Administrativo 100% configurável para Restaurante Bom Sabor. Personalize mensagens do WhatsApp, cardápio, carnes, bordas e pedidos.">
+    <title>Painel Administrativo &mdash; Delivery Bot</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta name="description" content="Painel Administrativo 100% configurável. Personalize mensagens do WhatsApp, cardápio, carnes, bordas e pedidos.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +32,7 @@
                 <div class="brand-logo">
                     <div class="logo-icon">🍽️</div>
                     <div class="brand-info">
-                        <h2 id="sidebar-salon-name">Restaurante Bom Sabor</h2>
+                        <h2 id="sidebar-salon-name">Meu Delivery</h2>
                         <span class="badge-pro">Painel Administrativo</span>
                     </div>
                 </div>
@@ -98,7 +99,7 @@
             <header class="topbar">
                 <div class="topbar-title">
                     <h1 id="page-title">Conexão WhatsApp & QR Code</h1>
-                    <p id="page-subtitle">Escaneie o código para ativar o bot de pedidos automáticos do Restaurante Bom Sabor</p>
+                    <p id="page-subtitle">Escaneie o código para ativar o bot de pedidos automáticos</p>
                 </div>
 
                 <div class="topbar-actions">
@@ -196,7 +197,7 @@
                             <div class="connected-details-box">
                                 <div class="detail-item">
                                     <span class="label">Perfil Conectado:</span>
-                                    <strong id="user-pushname">Restaurante Bom Sabor</strong>
+                                    <strong id="user-pushname">Meu Delivery</strong>
                                 </div>
                                 <div class="detail-item">
                                     <span class="label">Número do WhatsApp:</span>
@@ -649,12 +650,12 @@
                             </div>
                             <div class="form-group">
                                 <label for="cfg-dono">WhatsApp da Cozinha / Dono (com DDI e DDD)</label>
-                                <input type="text" id="cfg-dono" class="form-input" placeholder="5515974062762" required>
+                                <input type="text" id="cfg-dono" class="form-input" placeholder="5511999999999" required>
                                 <small>Receberá as comandas completas a cada novo pedido realizado no WhatsApp.</small>
                             </div>
                             <div class="form-group">
                                 <label for="cfg-endereco">Endereço Completo (Para Retirada)</label>
-                                <input type="text" id="cfg-endereco" class="form-input" placeholder="Rua das Delícias, 123 - Centro">
+                                <input type="text" id="cfg-endereco" class="form-input" placeholder="Rua, número - Bairro">
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
@@ -693,7 +694,6 @@
                         </div>
                         <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
                             <p>🛡️ <strong>Multi-Tenant Ativo:</strong> Os dados deste restaurante estão isolados com o identificador exclusivo <code>restaurante_principal</code>.</p>
-                            <p style="margin-top: 8px;">💾 <strong>Persistência Dupla:</strong> Backup em tempo real em <code>agendamentos.json</code> local e na nuvem do Supabase.</p>
                         </div>
                     </div>
                 </div>
@@ -708,7 +708,7 @@
                             <div class="whatsapp-chat-header">
                                 <div class="chat-avatar">🍽️</div>
                                 <div class="chat-info">
-                                    <strong id="sim-barber-title">Restaurante Bom Sabor</strong>
+                                    <strong id="sim-barber-title">Meu Delivery</strong>
                                     <span class="chat-status">online (Atendente Virtual)</span>
                                 </div>
                             </div>

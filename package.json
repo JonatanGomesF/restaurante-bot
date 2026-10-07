@@ -1,7 +1,7 @@
 {
   "name": "restaurante-bot",
   "version": "1.0.0",
-  "description": "Bot de pedidos e delivery para Restaurante Bom Sabor via WhatsApp (Marmitex de dia e Pizzas de noite) com Painel Web em Tempo Real",
+  "description": "Bot de pedidos e delivery via WhatsApp (Marmitex de dia e Pizzas de noite) com Painel Web em Tempo Real",
   "main": "chatbot.js",
   "bin": "chatbot.js",
   "scripts": {
@@ -30,6 +30,8 @@
   },
   "devDependencies": {
     "@yao-pkg/pkg": "^6.23.0",
-    "javascript-obfuscator": "^5.8.0"
+    "javascript-obfuscator": "^5.8.0",
+    "png-to-ico": "^3.0.2",
+    "rcedit": "^5.0.2"
   }
 }
