@@ -43,6 +43,21 @@ ALTER TABLE public.nichos ENABLE ROW LEVEL SECURITY;
 -- 4. Libera clientes.niche para nichos dinâmicos (remover o CHECK fixo).
 ALTER TABLE public.clientes DROP CONSTRAINT IF EXISTS clientes_niche_check;
 
+-- 5. Garantia em nível de banco: clientes.niche NUNCA pode ser null/vazio.
+--    Normaliza linhas existentes e cria um CHECK de integridade.
+UPDATE public.clientes
+SET    niche = 'delivery'
+WHERE  niche IS NULL OR length(trim(COALESCE(niche, ''))) = 0;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'clientes_niche_not_empty') THEN
+        ALTER TABLE public.clientes
+            ADD CONSTRAINT clientes_niche_not_empty
+            CHECK (niche IS NOT NULL AND length(trim(niche)) > 0);
+    END IF;
+END $$;
+
 -- =====================================================================
 -- NOTA: um novo nicho cadastrado aqui alimenta o select do cadastro de
 -- lojas no Painel Master. O fluxo do bot (engine) precisa conhecer o
