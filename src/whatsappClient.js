@@ -8,6 +8,33 @@ const { processarMensagem } = require('./botEngine');
 
 const APP_DIR = process.pkg ? path.dirname(process.execPath) : path.resolve(__dirname, '..');
 
+// ── Supabase: publica status do bot para o Painel Vercel via Realtime ─────
+let _supabaseClient = null;
+function getSupabase() {
+    if (_supabaseClient) return _supabaseClient;
+    try {
+        const { createClient } = require('@supabase/supabase-js');
+        const url = process.env.SUPABASE_URL;
+        const key = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
+        if (!url || !key) { console.warn('[BOT_STATUS] SUPABASE_URL ou SUPABASE_SERVICE_KEY não definidas — status não publicado.'); return null; }
+        _supabaseClient = createClient(url, key, { auth: { persistSession: false } });
+    } catch(e) { console.warn('[BOT_STATUS] Supabase não disponível:', e.message); }
+    return _supabaseClient;
+}
+
+async function publicarStatusBot(clienteId, campos) {
+    const sb = getSupabase();
+    if (!sb || !clienteId) return;
+    try {
+        await sb.from('bot_status').upsert(
+            { cliente_id: clienteId, ...campos, updated_at: new Date().toISOString() },
+            { onConflict: 'cliente_id' }
+        );
+    } catch(e) {
+        console.warn('[BOT_STATUS] Erro ao publicar status:', e.message);
+    }
+}
+
 // Helper para localizar o executável do Chrome/Edge/Brave em qualquer Windows
 function findChromeExecutable() {
     try {
@@ -164,6 +191,15 @@ class WhatsAppManager {
             };
             this.emit('qr', qrPayload);
             this.emit('status_change', qrPayload);
+
+            // ── Publica QR Code no Supabase (Painel Vercel lê via Realtime) ──
+            publicarStatusBot(process.env.CLIENTE_ID, {
+                status: 'QR_READY',
+                qr_string: this.currentQr,
+                qr_image: this.currentQrImage,
+                user_info: null,
+                error_msg: null
+            }).catch(() => {});
         });
 
         // Evento de Autenticação
@@ -190,20 +226,29 @@ class WhatsAppManager {
             try {
                 const info = this.client.info;
                 this.userInfo = {
-                    pushname: info?.pushname || 'Barbearia Bot',
-                    wid: info?.wid?.user || '',
+                    pushname: info?.pushname || 'Delivery Bot',
+                    wid: info?.wid?.user ? `${info.wid.user}@c.us` : '',
                     phone: info?.wid?.user || '',
                     platform: info?.platform || 'WhatsApp Web'
                 };
             } catch (err) {
-                this.userInfo = { pushname: 'Barbearia Bot', platform: 'Web' };
+                this.userInfo = { pushname: 'Delivery Bot', platform: 'Web' };
             }
 
-            console.log(`🚀 [BOT ONLINE] Barbearia Bot pronto para receber agendamentos! Conectado como: ${this.userInfo.pushname} (${this.userInfo.wid})`);
+            console.log(`🚀 [BOT ONLINE] Delivery Bot pronto! Conectado como: ${this.userInfo.pushname} (${this.userInfo.phone})`);
             
             const statusObj = this.getStatus();
             this.emit('ready', statusObj);
             this.emit('status_change', statusObj);
+
+            // ── Publica READY no Supabase ────────────────────────────────
+            publicarStatusBot(process.env.CLIENTE_ID, {
+                status: 'READY',
+                qr_string: null,
+                qr_image: null,
+                user_info: this.userInfo,
+                error_msg: null
+            }).catch(() => {});
         });
 
         // Evento de Desconexão Automática (celular ou painel)
@@ -218,6 +263,15 @@ class WhatsAppManager {
                 reason, 
                 message: 'WhatsApp desconectado. Gerando novo QR Code...' 
             });
+
+            // ── Publica DISCONNECTED no Supabase ─────────────────────────
+            publicarStatusBot(process.env.CLIENTE_ID, {
+                status: 'DISCONNECTED',
+                qr_string: null,
+                qr_image: null,
+                user_info: null,
+                error_msg: `Desconectado: ${reason}`
+            }).catch(() => {});
 
             // Aguarda liberação dos arquivos do Chrome e reinicia para gerar novo QR Code
             setTimeout(async () => {

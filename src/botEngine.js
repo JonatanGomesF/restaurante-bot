@@ -665,7 +665,9 @@ async function finalizarEConfirmarPedido({ responder, from, nomeCliente, estado,
 
     let entregaInfoDono = ped.tipoEntrega === 'delivery' 
         ? `🛵 *DELIVERY:* ${ped.enderecoEntrega}`
-        : `🛍️ *RETIRADA NO BALCÃO*`;
+        : (ped.tipoEntrega === 'agendamento' || ped.tipoEntrega === 'presencial')
+            ? `📍 *ATENDIMENTO PRESENCIAL*`
+            : `🛍️ *RETIRADA NO BALCÃO*`;
 
     let trocoTxt = ped.trocoPara ? ` (Troco para ${formatarMoeda(ped.trocoPara)})` : '';
 
@@ -698,7 +700,9 @@ async function finalizarEConfirmarPedido({ responder, from, nomeCliente, estado,
 
     let localEntregaCliente = ped.tipoEntrega === 'delivery'
         ? `📍 *Endereço de Entrega:* ${ped.enderecoEntrega}`
-        : `🛍️ *Retirar no Restaurante:* ${config.endereco}`;
+        : (ped.tipoEntrega === 'agendamento' || ped.tipoEntrega === 'presencial')
+            ? `📍 *Atendimento Presencial*`
+            : `🛍️ *Retirar no Restaurante:* ${config.endereco}`;
 
     let taxaInfoCliente = ped.taxaEntrega > 0 ? `🛵 *Taxa de Entrega:* ${formatarMoeda(ped.taxaEntrega)}\n` : '';
 
@@ -732,8 +736,21 @@ async function enviarMenuPrincipal(responder, nomeCliente, config) {
         });
     }
 
-    const turno = db.getTurnoAtual();
-    let avisoTurno = `⏰ *Agora:* ${turno.icone} ${turno.nome} — _${turno.descricao}_\n`;
+    // Nicho do cliente (buscado ANTES de gerar o aviso de turno)
+    const niche = db.getNiche ? db.getNiche() : 'delivery';
+
+    // Aviso de turno só existe para delivery (Almoço/Jantar).
+    // Fora de delivery: avisoTurno fica vazio (linha totalmente suprimida).
+    const turno = db.getTurnoAtual(niche);
+    let avisoTurno = '';
+    if (turno) {
+        avisoTurno = `⏰ *Agora:* ${turno.icone} ${turno.nome} — _${turno.descricao}_\n`;
+    } else {
+        // Agendamento (barbershop/clinic/petshop/salon): apenas o horário
+        // normal, se estiver configurado pelo tenant.
+        const horario = db.getHorarioNormal ? db.getHorarioNormal() : '';
+        if (horario) avisoTurno = `🕘 *Horário:* ${horario}\n`;
+    }
 
     const textoMenu = formatarTexto(mensagens.menuPrincipal || `🍽️ *BEM-VINDO AO {restaurante}* 🍽️\n\nOlá, *{nome}*!\n\n{avisoTurno}\n{avisoFechado}\n1️⃣ 🛒 *Fazer Pedido*\n2️⃣ 📋 *Ver Cardápio*\n3️⃣ 🛵 *Status do Pedido*\n4️⃣ 📍 *Informações & Horários*\n5️⃣ ❌ *Cancelar Pedido*\n\n👉 _Digite o número da opção desejada:_`, {
         restaurante: config.nomeRestaurante.toUpperCase(),
@@ -808,7 +825,8 @@ async function consultarStatusPedido(responder, from, nomeCliente, config) {
 
     let lista = pedidos.map(p => {
         const statusTexto = mapaStatus[p.status] || p.status;
-        const tipoTxt = p.tipoEntrega === 'delivery' ? '🛵 Delivery' : '🛍️ Retirada';
+        const tipoTxt = p.tipoEntrega === 'delivery' ? '🛵 Delivery'
+            : ((p.tipoEntrega === 'agendamento' || p.tipoEntrega === 'presencial') ? '📍 Atendimento Presencial' : '🛍️ Retirada');
         return `🎫 *Pedido ${p.codigo}*\n` +
             `🍽️ *Itens:* ${p.servico}\n` +
             `💰 *Total:* ${formatarMoeda(p.total)} (${tipoTxt})\n` +

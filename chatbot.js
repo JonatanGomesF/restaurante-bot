@@ -1,8 +1,10 @@
+require('dotenv').config(); // Carrega .env antes de qualquer outra coisa
 const path = require('path');
 const fs = require('fs');
 const { startServer } = require('./src/server');
 const db = require('./src/database');
 const whatsappManager = require('./src/whatsappClient');
+
 
 const APP_DIR = process.pkg ? path.dirname(process.execPath) : __dirname;
 

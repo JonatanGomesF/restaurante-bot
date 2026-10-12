@@ -126,6 +126,10 @@ CREATE TABLE IF NOT EXISTS public.conversas (
 
 -- =====================================================================
 -- TABELA 7: mensagens_bot (templates de mensagens configuráveis por cliente)
+-- CRUD Relacional (sem JSONs): cada mensagem é uma linha própria.
+--   GET    → linhas por cliente_id
+--   POST   → upsert por (cliente_id, chave)
+--   DELETE → remove linha por chave ou id
 -- =====================================================================
 CREATE TABLE IF NOT EXISTS public.mensagens_bot (
     id SERIAL PRIMARY KEY,

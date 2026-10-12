@@ -967,6 +967,43 @@
   },
   "pedidos": [
     {
+      "id": "ped_1791425213892_6228",
+      "codigo": "#PED-6228",
+      "cliente": "Jonatan",
+      "telefone": "97908191973567@lid",
+      "data": "2026-10-07",
+      "horario": "23:06",
+      "itens": [
+        {
+          "id": 1,
+          "qtd": 1,
+          "nome": "Marmitex P (Pequena)",
+          "borda": null,
+          "preco": 18,
+          "total": 18,
+          "observacao": "Carne: 🥩 Bife Bovino Acebolado",
+          "opcoesCarne": null
+        }
+      ],
+      "servico": "1x Marmitex P (Pequena)",
+      "subtotal": 18,
+      "taxaEntrega": 5,
+      "total": 23,
+      "preco": 23,
+      "tipoEntrega": "delivery",
+      "enderecoEntrega": "rua chacaras paulistas n12 itu sp",
+      "bairro": "",
+      "formaPagamento": "Dinheiro",
+      "trocoPara": 50,
+      "observacoes": "",
+      "status": "pendente",
+      "origem": "whatsapp",
+      "tempoEstimado": "",
+      "criadoEm": "2026-10-08T02:06:53.891+00:00",
+      "canceladoEm": null,
+      "concluidoEm": null
+    },
+    {
       "id": "ped_1791284462083_9579",
       "codigo": "#PED-9579",
       "cliente": "Cliente",
@@ -1259,6 +1296,43 @@
     }
   ],
   "agendamentos": [
+    {
+      "id": "ped_1791425213892_6228",
+      "codigo": "#PED-6228",
+      "cliente": "Jonatan",
+      "telefone": "97908191973567@lid",
+      "data": "2026-10-07",
+      "horario": "23:06",
+      "itens": [
+        {
+          "id": 1,
+          "qtd": 1,
+          "nome": "Marmitex P (Pequena)",
+          "borda": null,
+          "preco": 18,
+          "total": 18,
+          "observacao": "Carne: 🥩 Bife Bovino Acebolado",
+          "opcoesCarne": null
+        }
+      ],
+      "servico": "1x Marmitex P (Pequena)",
+      "subtotal": 18,
+      "taxaEntrega": 5,
+      "total": 23,
+      "preco": 23,
+      "tipoEntrega": "delivery",
+      "enderecoEntrega": "rua chacaras paulistas n12 itu sp",
+      "bairro": "",
+      "formaPagamento": "Dinheiro",
+      "trocoPara": 50,
+      "observacoes": "",
+      "status": "pendente",
+      "origem": "whatsapp",
+      "tempoEstimado": "",
+      "criadoEm": "2026-10-08T02:06:53.891+00:00",
+      "canceladoEm": null,
+      "concluidoEm": null
+    },
     {
       "id": "ped_1791284462083_9579",
       "codigo": "#PED-9579",
