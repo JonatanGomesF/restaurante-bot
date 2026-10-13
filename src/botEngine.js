@@ -572,6 +572,47 @@ async function processarMensagem({ from, nome, texto, sendMessage, sendTyping, e
             }
         }
 
+        // ---- ETAPA 9: ESCOLHA DE PROFISSIONAL/ATENDENTE (Agendamento) ----
+        case 'waiting_professional': {
+            // Consulta profissionais filtrados pelo cliente_id do estabelecimento
+            const { data: profissionais } = await db.supabase
+                .from('profissionais')
+                .select('*')
+                .eq('cliente_id', process.env.CLIENTE_ID)
+                .eq('ativo', true);
+
+            const profissionaisDisponiveis = profissionais || [];
+
+            if (profissionaisDisponiveis.length === 0) {
+                // Se não houver profissionais cadastrados, pula direto para escolha de data/horário
+                db.setEstadoConversa(from, {
+                    ...estado,
+                    status: 'waiting_date'
+                });
+                return await responder(
+                    formatarTexto(mensagens.escolhaData || `📅 *Agendamento*:\n\nPor favor, digite a data desejada para o agendamento (formato: DD/MM/AAAA):\n_Digite a data:_`, {
+                        restaurante: config.nomeRestaurante
+                    })
+                );
+            }
+
+            // Lista profissionais disponíveis
+            const profsTexto = profissionaisDisponiveis.map((p, i) => `${i + 1}. ${p.nome || `Profissional ${i + 1}`}`).join('\n');
+
+            db.setEstadoConversa(from, {
+                ...estado,
+                status: 'waiting_service',
+                profissionaisDisponiveis
+            });
+
+            return await responder(
+                formatarTexto(mensagens.escolhaProfissional || `💈 *ESCOLHA O PROFISSIONAL:*\n\n{listaProfissionais}\n\n_Digite o número do profissional desejado:_`, {
+                    listaProfissionais: profsTexto,
+                    restaurante: config.nomeRestaurante
+                })
+            );
+        }
+
         default:
             db.limparEstadoConversa(from);
             return await enviarMenuPrincipal(responder, nomeCliente, config);

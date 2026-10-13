@@ -1566,5 +1566,6 @@ module.exports = {
     getAgendamentosCliente,
     getTodosAgendamentos,
     getHorariosDisponiveis,
-    getProximosDiasDisponiveis
+    getProximosDiasDisponiveis,
+    supabase
 };
